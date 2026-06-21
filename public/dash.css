@@ -2032,7 +2032,7 @@ a {
     .chat-panel {
         right: 12px;
         bottom: 84px;
-        height: 480px;
+        height: 680px;
     }
 
     .user-chip {
@@ -2050,6 +2050,7 @@ a {
         position: absolute;
         right: 10px;
     }
+
 
 }
 

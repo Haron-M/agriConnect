@@ -118,6 +118,81 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
     }
 });
 /**
+ * Secure proxy endpoint to generate symptoms and treatment recommendations 
+ * for a disease identified by the Pl@ntNet API
+ */
+app.post('https://agri-connect-phi-ten.vercel.app/dash.html/api/agribot/diagnose', async (req, res) => {
+    try {
+        const { diseaseName, speciesName } = req.body;
+
+        if (!diseaseName) {
+            return res.status(400).json({ error: "Missing identified disease name parameter." });
+        }
+
+        const systemPrompt = `You are AgriBot, an elite plant pathology and agricultural agronomy expert tool.
+Your job is to provide clear, actionable insights for the crop disease provided by the user.
+
+Format your output EXACTLY using these 3 clean sections:
+
+### 🔍 Observed Symptoms
+(Provide 2-3 concise, bulleted points describing exactly how this disease manifests on leaves, stems, or fruits so the farmer can visually confirm it.)
+
+### 🌿 Treatment & Controls
+(Provide highly practical, safe management practices. Include organic/cultural solutions first, followed by specific chemical controls if necessary.)
+
+### 🛡️ Preventative Measures
+(Provide 2 bulleted recommendations on how to prevent this issue from returning or spreading across the farm plot, such as crop rotation, spacing, or irrigation tweaks.)
+
+Be direct, warm, and highly practical. Avoid vague medical jargon. Keep descriptions short and scannable for farmers.`;
+
+        const userMessage = `The Pl@ntNet API has detected ${diseaseName} on a ${speciesName || 'crop'} plant. Please provide the symptoms, treatments, and control layout.`;
+
+        // Set up SSE headers for streaming token tokens
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const response = await fetch(NVIDIA_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${NVIDIA_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "meta/llama-3.3-70b-instruct",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userMessage }
+                ],
+                temperature: 0.3, // Low temperature for highly precise factual treatment data
+                max_tokens: 800,
+                stream: true
+            })
+        });
+
+        if (!response.ok) {
+            res.write(`data: ${JSON.stringify({ error: "Failed connecting upstream to diagnostics engine" })}\n\n`);
+            return res.end();
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            res.write(chunk);
+        }
+        res.end();
+
+    } catch (error) {
+        console.error("Diagnostics pipeline server crash:", error);
+        res.write(`data: ${JSON.stringify({ error: "Internal Server Treatment processing error" })}\n\n`);
+        res.end();
+    }
+});
+/**
  * Secure proxy endpoint for fetching regional weather and geolocation metrics
  */
 app.post('/api/weather', async (req, res) => {

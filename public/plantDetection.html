@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Plant Disease Detection — AgriMarket Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --green: #1f9d55;
+            --green-dark: #157a40;
+            --green-darker: #0f5d31;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --bg: #f7f9fb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
+
+        html,
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--green);
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            color: var(--ink);
+        }
+
+        .logo-text span {
+            color: var(--green);
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            color: #fff;
+            padding: 56px 24px;
+        }
+
+        .hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pill {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 800;
+            margin-bottom: 14px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            max-width: 720px;
+            font-size: clamp(14px, 2vw, 16px);
+            opacity: 0.92;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Crop selector */
+        .crop-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .crop-label {
+            font-weight: 600;
+            color: var(--ink);
+            margin-right: 4px;
+        }
+
+        .chip {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            color: var(--ink);
+        }
+
+        .chip:hover {
+            border-color: var(--green);
+        }
+
+        .chip.active {
+            border-color: var(--green);
+            color: var(--green-darker);
+            background: #ecfdf5;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-sub {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Dropzone Input Setup */
+        .dropzone {
+            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fafbfc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 220px;
+        }
+
+        .dropzone:hover,
+        .dropzone.dragging {
+            border-color: var(--green);
+            background: #ecfdf5;
+        }
+
+        .upload-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: white;
+            color: var(--green);
+            display: grid;
+            place-items: center;
+            margin-bottom: 14px;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #edf2f7;
+            transition: transform 0.2s ease;
+            z-index: 2;
+        }
+
+        .dropzone:hover .upload-btn {
+            transform: scale(1.1);
+            background: var(--green);
+            color: white;
+        }
+
+        .dropzone-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+            z-index: 2;
+        }
+
+        .dropzone-hint {
+            color: var(--muted);
+            font-size: 13px;
+            z-index: 2;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Render Output Canvas Container */
+        .preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: none;
+            z-index: 1;
+        }
+
+        .preview img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 11px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: #fff;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--green-dark);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .btn-ghost {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--ink);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--green);
+            color: var(--green-darker);
+        }
+
+        /* Status Banner Messages */
+        #statusMessage {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            color: #2b6cb0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-weight: 500;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Diagnostic Output Layout Workspaces */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 12px;
+            font-size: 24px;
+        }
+
+        #resultSection {
+            display: none;
+        }
+
+        .diag-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .disease-name-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .disease-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .confidence {
+            background: #ecfdf5;
+            color: var(--green-darker);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .section-h {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--muted);
+            margin: 20px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #libDescription {
+            font-size: 13px;
+            color: #b56c10;
+            background: #fffaf0;
+            border: 1px solid #feebc8;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        /* Dynamic Custom Text Nodes */
+        .details-text-box {
+            font-size: 14.5px;
+            color: #334155;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            white-space: pre-line;
+        }
+
+        /* Progress Spinner Style */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero {
+                padding: 40px 20px;
+            }
+
+            .container {
+                padding: 24px 16px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .crop-row {
+                gap: 8px;
+            }
+
+            .chip {
+                padding: 7px 13px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🌿</div>
+            <div class="logo-text">AgriMarket <span>Connect</span></div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="pill">COMPUTER VISION • AI PATHOLOGY</span>
+            <h1>AI Plant Disease Detection</h1>
+            <p>Upload a leaf photo. Our model identifies the disease, assesses severity, and gives you a full treatment
+                plan with precise pesticide dosages — in seconds.</p>
+        </div>
+    </section>
+
+    <main class="container">
+
+        <div class="crop-row">
+            <span class="crop-label">Crop:</span>
+            <button class="chip">🌽 Maize</button>
+            <button class="chip">🍅 Tomato</button>
+            <button class="chip">🥔 Potato</button>
+            <button class="chip">🫘 Beans</button>
+            <button class="chip">🌾 Rice</button>
+            <button class="chip">🌿 Wheat</button>
+            <button class="chip">🍠 Cassava</button>
+            <button class="chip active">🔍 Auto-detect</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">📷 Upload Plant Image</div>
+                <div class="card-sub">JPG • PNG • WEBP — max 10 MB</div>
+
+                <label class="dropzone" id="dropzone" for="fileInput">
+                    <div class="upload-btn"><i class="fa-solid fa-camera"></i></div>
+                    <div id="uploadPrompt" class="dropzone-text">Tap Camera to capture or <span>browse files</span>
+                    </div>
+                    <div class="dropzone-hint">A clear photo of one leaf works best</div>
+
+                    <div class="preview" id="previewContainer">
+                        <img id="imagePreview" alt="Target Crop Node" />
+                    </div>
+                </label>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp"
+                    onchange="processLocalImage(event)" />
+
+                <div class="actions">
+                    <button class="btn btn-primary" id="actionBtn" onclick="runAutomatedPipeline()" disabled>Analyze
+                        Leaf</button>
+                    <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔬 Diagnosis Results</div>
+                <div class="card-sub">AI-generated diagnosis and treatment plan</div>
+
+                <div id="statusMessage">Pipeline monitoring details loading...</div>
+
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">🌱</div>
+                    <div>Upload an image to begin diagnosis</div>
+                </div>
+
+                <div id="resultSection">
+
+                    <div id="libDescription">Source Verification Status Log</div>
+                    <div class="diag-row">
+                        <div class="disease-name-wrapper">
+                            <div
+                                style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 2px;">
+                                Disease Identified
+                            </div>
+                            <div id="detectedName" class="disease-name">—</div>
+                        </div>
+                        <div id="detectedConfidence" class="confidence">0.0%</div>
+                    </div>
+
+                    <div class="section-h"><i class="fa-solid fa-eye" style="color: var(--green);"></i> Observed
+                        Symptoms</div>
+                    <div id="libSymptoms" class="details-text-box">Pathology context breakdown goes here...</div>
+
+                    <div class="section-h"><i class="fa-solid fa-kit-medical" style="color: var(--green);"></i>
+                        Recommended Controls</div>
+                    <div id="libControls" class="details-text-box">Remediation steps go here...</div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js">
+        // Crop chips interaction layout control
+
+    </script>
+</body>
+
+</html>
