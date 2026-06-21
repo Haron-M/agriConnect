@@ -1,6 +1,8 @@
 /* ==========================================================================
    1. UTIL & HELPERS
    ========================================================================== */
+let conversationHistory = [];
+
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
@@ -1105,6 +1107,67 @@ function appendChatMessageElement(text, senderClass) {
     return rowWrapper.querySelector('.msg');
 }
 
+async function sendMessageToAgriBot(userMessageText) {
+    if (!userMessageText.trim()) return;
+
+    // 2. Append the user's new message to your running history array
+    conversationHistory.push({ role: "user", content: userMessageText });
+
+    try {
+        // 3. Send the FULL history array to your server endpoint
+        const response = await fetch('/api/agribot/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chatHistory: conversationHistory // Send the whole history instead of just one message
+            })
+        });
+
+        // ... your existing streaming code setup (reader/decoder loop) ...
+        let botResponseText = "";
+
+        // Inside your streaming while(true) loop where you receive text:
+        // botResponseText += decodedChunk; 
+
+        // 4. Once the stream is COMPLETELY finished (done === true), 
+        // save the bot's final answer to the history so it remembers it next time!
+        conversationHistory.push({ role: "assistant", content: botResponseText });
+
+    } catch (error) {
+        console.error("Chat error:", error);
+    }
+}
+// 1. Hook into your HTML elements using the exact IDs provided
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+
+// 2. This helper function extracts the text and triggers your main chat engine
+function triggerMessageDelivery() {
+    const messageText = chatInput.value.trim();
+
+    // Only send if the input isn't empty spaces
+    if (messageText !== "") {
+
+        // CALL YOUR FUNCTION HERE!
+        sendMessageToAgriBot(messageText);
+
+        // Instantly clear the text box so the user can type their next question
+        chatInput.value = '';
+    }
+}
+
+// 3. Listen for a mouse click on the "➤" button
+chatSend.addEventListener('click', triggerMessageDelivery);
+
+// 4. Listen for the "Enter" key being pressed down inside the input field
+chatInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Stop any default page reload behaviors
+        triggerMessageDelivery();
+    }
+});
 /**
  * Layout position focus updates anchor helper engine
  */
