@@ -63,13 +63,12 @@ async function bootstrapPipeline() {
  */
 async function fetchWeatherTelemetry(lat, lon) {
     try {
-        // Dispatches coordinates to your single secure Node.js proxy endpoint
-        const response = await fetch('/api/weather', {
-            method: 'POST',
+        // Dispatches coordinates to your single secure Node.js proxy endpoint (Using URL query parameters)
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ lat: lat, lon: lon })
+            }
         });
 
         if (!response.ok) throw new Error(`Backend weather proxy returned an error state: ${response.status}`);
@@ -78,13 +77,13 @@ async function fetchWeatherTelemetry(lat, lon) {
         const { forecast, geo } = await response.json();
 
         // 2. Extract precision administrative layers matching reverse geocode layout
-        let structuralLocationName = forecast.city.name;
-        let structuralLocation = forecast.city.name;
+        let structuralLocationName = forecast?.city?.name || "Unknown Location";
+        let structuralLocation = forecast?.city?.name || "Local Region";
 
         if (geo && geo.length > 0) {
             const details = geo[0];
             const localizedArea = details.local_names?.en || details.name;
-            const countyOrState = details.state ? `, ${details.state},KE` : '';
+            const countyOrState = details.state ? `, ${details.state}, KE` : '';
             const county = details.state ? ` ${details.state}, KE` : '';
             structuralLocationName = `${localizedArea}${countyOrState}`;
             structuralLocation = `${county} 📍`;
@@ -355,12 +354,13 @@ function animateMultiAxisLineGraph() {
         path.style.strokeDashoffset = '0';
     });
 
+    // FIXED: Changed erroneous 'path' variable inside the animation assignments to 'fill'
     [fillNodeT, fillNodeH].forEach(fill => {
         if (!fill) return;
         fill.style.opacity = '0';
         fill.style.transition = 'none';
         fill.getBoundingClientRect();
-        path.style.transition = 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1)';
+        fill.style.transition = 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1)';
         fill.style.opacity = '1';
     });
 
