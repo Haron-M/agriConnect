@@ -889,11 +889,21 @@ async function renderDynamicChatGreeting() {
             // Pull name metadata attribute or user email prefix safely
             let rawName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
 
-            // Extract ONLY the first name (split by spaces and take the first item)
-            userName = rawName.trim().split(' ')[0];
+            // 1. If it's a full name with spaces, grab the first word
+            let firstName = rawName.trim().split(' ')[0];
+
+            // 2. If it's an email prefix with numbers (like "haronmoenga9"), 
+            // strip out all numbers and trailing characters to clean it up
+            firstName = firstName.replace(/[0-9]/g, ''); // Removes '9' -> "haronmoenga"
+
+            // 3. Optional: If your email prefix joins names (like "haronmoenga"), 
+            // you can hardcode a check or slice it if you want it completely pristine:
+            if (firstName.toLowerCase().startsWith("haron")) {
+                firstName = "Haron";
+            }
 
             // Capitalize the first letter neatly for display
-            userName = userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase();
+            userName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
         }
     } catch (e) {
         console.warn("Could not read user profile metadata for chat greeting:", e);
