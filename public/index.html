@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMarket Connect</title>
+
+    <link rel="stylesheet" href="homepage.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════
+     SHARED NAV (shown on home page only — hidden on auth)
+═══════════════════════════════════════════════ -->
+    <nav id="main-nav">
+        <div class="nav-inner">
+            <a class="nav-logo" onclick="showPage('home')">🌿 <span>AgriMarket<strong
+                        style="color:var(--green-700)">Connect</strong></span></a>
+            <div class="nav-links" id="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how">How it works</a>
+                <a href="#testimonials">Testimonials</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-ghost" onclick="showPage('login')">Login</button>
+                <button class="btn-primary" onclick="showPage('signup')">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+     HOME PAGE
+═══════════════════════════════════════ -->
+    <div id="page-home" class="page active">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="hero-text">
+                    <div class="hero-badge">
+                        <span class="hero-badge-dot"></span>
+                        Market Intelligence
+                    </div>
+                    <h1>Empowering Farmers with Real-Time Agricultural Market Intelligence</h1>
+                    <p>Track crop prices, discover how to control pest, monitor weather conditions, and make informed
+                        farming decisions from anywhere.</p>
+                    <div class="hero-cta">
+                        <button class="btn-hero-primary" onclick="showPage('signup')">🌱 Get Started</button>
+                        <button class="btn-hero-secondary" onclick="showPage('login')">Login</button>
+                    </div>
+                    <div class="hero-avatars">
+                        <div class="avatar-stack">
+                            <img src="https://market-grow-wise.lovable.app/assets/testimonial-1-B9RuyPNI.jpg"
+                                alt="farmer 1">
+                            <img src="https://market-grow-wise.lovable.app/assets/testimonial-2-DXytLlkc.jpg"
+                                alt="farmer 2">
+                            <img src="https://market-grow-wise.lovable.app/assets/testimonial-3-DnWKoDe0.jpg"
+                                alt="farmer 3">
+                        </div>
+                        Trusted by <strong>&nbsp;50,000+ farmers</strong>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-card">
+                        <img class="hero-img" src="https://market-grow-wise.lovable.app/assets/hero-farmer-KcDort9X.jpg"
+                            alt="Farmer in field">
+                        <div class="hero-card-body">
+                            <div class="price-live">
+                                <span class="live-dot"></span>
+                                <span class="live-label">LIVE</span>
+                                <span class="live-loc">· Nairobi</span>
+                            </div>
+                            <div class="price-row">
+                                <div>
+                                    <div class="price-crop">White Maize</div>
+                                    <div class="price-val">KSh 4,200</div>
+                                    <div class="price-week">this week</div>
+                                </div>
+                                <div class="price-up">+12% ▲</div>
+                            </div>
+                            <div class="weather-row">
+                                <span>☀️</span>
+                                <span>24°C · Sunny &nbsp;·&nbsp; Light rain in 2 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="space"></div>
+
+        <!-- STATS -->
+        <section class="stats-bar" id="stats-bar">
+            <div class="stats-inner">
+                <div class="stat-item">
+                    <div class="stat-num" id="s1">50k+</div>
+                    <div class="stat-label">Farmers Joined</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num" id="s2">200+</div>
+                    <div class="stat-label">Live Markets</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num" id="s3">1M+</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num" id="s4">47</div>
+                    <div class="stat-label">Counties Covered</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="features" id="features">
+            <div class="section-tag">What you get</div>
+            <h2 class="section-title">Smart farming features, built for the field.</h2>
+            <p class="section-sub">Every tool you need to bridge the gap between soil and sale.</p>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-Time Market Prices</h3>
+                    <p>Live wholesale prices for maize, beans, wheat, rice, and 40+ crops across regional hubs.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📍</div>
+                    <h3>Location-Based Pricing</h3>
+                    <p>Automatic location detection surfaces the markets closest to your farm gate.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🌦️</div>
+                    <h3>Weather Forecasts</h3>
+                    <p>Hyperlocal 7-day forecasts and rainfall alerts tuned to your specific county.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Buyer &amp; Seller Marketplace</h3>
+                    <p>Skip the middlemen. Connect directly with verified buyers and institutional off-takers.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📈</div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Track price trends, seasonality, and market insights with beautiful visualisations.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Friendly</h3>
+                    <p>Built mobile-first. Access market data from anywhere, even on a basic smartphone.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="how" id="how">
+            <div class="section-tag">How it works</div>
+            <h2 class="section-title">From sign-up to your first sale in minutes.</h2>
+            <p class="section-sub" style="margin-bottom:4rem">&nbsp;</p>
+            <div class="steps-grid">
+                <div class="step reveal">
+                    <div class="step-num">01</div>
+                    <h4>Create an Account</h4>
+                    <p>Quick sign-up with your phone number — no paperwork.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-num">02</div>
+                    <h4>Select Your Location</h4>
+                    <p>Pin your farm so we serve nearby markets and weather.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-num">03</div>
+                    <h4>View Market Prices</h4>
+                    <p>Compare live prices across hubs to time your harvest.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-num">04</div>
+                    <h4>Connect with Buyers</h4>
+                    <p>Message verified buyers and lock in fair, transparent deals.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section class="testimonials" id="testimonials">
+            <div class="section-tag">Voices from the field</div>
+            <h2 class="section-title">Trusted by farmers and traders across the country.</h2>
+            <p class="section-sub" style="margin-bottom:3rem">&nbsp;</p>
+            <div class="testi-grid">
+                <div class="testi-card reveal">
+                    <div class="quote-icon">"</div>
+                    <blockquote>Since joining AgriMarket Connect, my profit per acre has increased by 30%. I no longer
+                        guess the price; I know it.</blockquote>
+                    <div class="testi-author">
+                        <img src="https://market-grow-wise.lovable.app/assets/testimonial-1-B9RuyPNI.jpg"
+                            alt="Grace Wambui">
+                        <div>
+                            <div class="testi-name">Grace Wambui</div>
+                            <div class="testi-role">Maize Farmer, Nakuru County</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testi-card reveal">
+                    <div class="quote-icon">"</div>
+                    <blockquote>I source directly from 200+ farmers on the platform. Quality is consistent and pricing
+                        is transparent for both sides.</blockquote>
+                    <div class="testi-author">
+                        <img src="https://market-grow-wise.lovable.app/assets/testimonial-2-DXytLlkc.jpg"
+                            alt="Daniel Otieno">
+                        <div>
+                            <div class="testi-name">Daniel Otieno</div>
+                            <div class="testi-role">Produce Trader, Nairobi</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testi-card reveal">
+                    <div class="quote-icon">"</div>
+                    <blockquote>The weather alerts saved my rice crop last season. This app pays for itself many times
+                        over.</blockquote>
+                    <div class="testi-author">
+                        <img src="https://market-grow-wise.lovable.app/assets/testimonial-3-DnWKoDe0.jpg"
+                            alt="Samuel Kiprono">
+                        <div>
+                            <div class="testi-name">Samuel Kiprono</div>
+                            <div class="testi-role">Rice Farmer, Mwea</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-banner">
+            <div class="cta-inner reveal">
+                <h2>Ready to Grow Your Agricultural Business?</h2>
+                <p>Join 50,000+ farmers and traders making data-driven decisions every day.</p>
+                <div class="cta-btns">
+                    <button class="btn-cta-primary" onclick="showPage('signup')">🌱 Create Free Account</button>
+                    <button class="btn-cta-secondary" onclick="showPage('login')">Sign In</button>
+                </div>
+                <div class="cta-pills">
+                    <span class="cta-pill">Free forever plan</span>
+                    <span class="cta-pill">No credit card</span>
+                    <span class="cta-pill">Set up in 2 minutes</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer id="contact">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <div class="logo">🌿 AgriMarketConnect</div>
+                    <p>Empowering farmers across 47 counties with real-time market intelligence.</p>
+                    <div class="social-links">
+                        <a class="social-link" href="#">𝕏</a>
+                        <a class="social-link" href="#">f</a>
+                        <a class="social-link" href="#">◎</a>
+                        <a class="social-link" href="#">in</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h5>Platform</h5>
+                    <ul>
+                        <li><a href="#">Market Prices</a></li>
+                        <li><a href="#">Weather</a></li>
+                        <li><a href="#">Marketplace</a></li>
+                        <li><a href="#">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h5>Company</h5>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Services</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h5>Legal</h5>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">support@agrimarket.co</a></li>
+                        <li><a href="#">+254 700 000 000</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 AgriMarket Connect Ltd. All rights reserved.</p>
+                <span class="footer-tagline">Cultivating data. Growing futures.</span>
+            </div>
+        </footer>
+
+    </div><!-- end #page-home -->
+
+
+    <!-- ═══════════════════════════════════════
+     SIGN UP PAGE
+═══════════════════════════════════════ -->
+    <div id="page-signup" class="page">
+        <div class="auth-page">
+
+            <!-- Left brand panel -->
+            <div class="auth-left">
+                <div class="auth-left-content">
+                    <div class="auth-brand-logo" onclick="showPage('home')">🌿 AgriMarketConnect</div>
+                    <h2>Start growing smarter today.</h2>
+                    <p>Join 50,000+ farmers and traders already using AgriMarket Connect to boost their profits with
+                        real-time data.</p>
+                    <ul class="auth-features-list">
+                        <li><span class="check">✓</span>Live crop prices from 200+ markets</li>
+                        <li><span class="check">✓</span>Hyperlocal 7-day weather forecasts</li>
+                        <li><span class="check">✓</span>Direct buyer &amp; seller connections</li>
+                        <li><span class="check">✓</span>Analytics dashboard &amp; price alerts</li>
+                        <li><span class="check">✓</span>Free forever — no credit card needed</li>
+                    </ul>
+                    <div class="auth-testimonial">
+                        <blockquote>"Since joining, my profit per acre has increased by 30%. I no longer guess the
+                            price."</blockquote>
+                        <div class="auth-testi-author">
+                            <img src="https://market-grow-wise.lovable.app/assets/testimonial-1-B9RuyPNI.jpg"
+                                alt="Grace Wambui">
+                            <div>
+                                <div class="auth-testi-name">Grace Wambui</div>
+                                <div class="auth-testi-role">Maize Farmer, Nakuru County</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right form panel -->
+
+            <div class="auth-right">
+                <div class="auth-form-wrap">
+                    <div class="auth-form-header">
+                        <h1>Create your account</h1>
+                        <p>Already have an account? <a onclick="showPage('login')">Sign in here</a></p>
+                    </div>
+
+                    <!-- Google signup -->
+                    <button class="btn-google" onclick="handleGoogleAuth('signup')">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="divider">
+                        <div class="divider-line"></div><span>or sign up with email</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <!-- Role selector -->
+                    <div style="margin-bottom:0.5rem"><label>I am a</label></div>
+                    <div class="role-selector">
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role-farmer" value="farmer" checked>
+                            <label class="role-label" for="role-farmer"><span class="role-icon">🌾</span><span
+                                    class="role-text">Farmer</span></label>
+                        </div>
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role-trader" value="trader">
+                            <label class="role-label" for="role-trader"><span class="role-icon">🏪</span><span
+                                    class="role-text">Trader / Buyer</span></label>
+                        </div>
+                    </div>
+
+                    <!-- Name row -->
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label for="su-fname">First Name</label>
+                            <div class="input-wrap">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="su-fname" placeholder="Grace">
+                            </div>
+                            <div class="field-error" id="err-fname">Please enter your first name</div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label for="su-lname">Last Name</label>
+                            <div class="input-wrap">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="su-lname" placeholder="Wambui">
+                            </div>
+                            <div class="field-error" id="err-lname">Please enter your last name</div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="su-email">Email Address</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">✉️</span>
+                            <input type="email" id="su-email" placeholder="grace@example.com">
+                        </div>
+                        <div class="field-error" id="err-email">Please enter a valid email address</div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="form-group">
+                        <label for="su-phone">Phone Number</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">📱</span>
+                            <input type="tel" id="su-phone" placeholder="+254 700 000 000">
+                        </div>
+                        <div class="field-error" id="err-phone">Please enter a valid phone number</div>
+                    </div>
+
+                    <!-- County -->
+                    <div class="form-group">
+                        <label for="su-county">County</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">📍</span>
+                            <select id="su-county" class="county-select">
+                                <option value="">Select your county…</option>
+                                <option>Nairobi</option>
+                                <option>Mombasa</option>
+                                <option>Kisumu</option>
+                                <option>Nakuru</option>
+                                <option>Eldoret / Uasin Gishu</option>
+                                <option>Kiambu</option>
+                                <option>Machakos</option>
+                                <option>Meru</option>
+                                <option>Kakamega</option>
+                                <option>Bungoma</option>
+                                <option>Kilifi</option>
+                                <option>Nyeri</option>
+                                <option>Murang'a</option>
+                                <option>Embu</option>
+                                <option>Trans Nzoia</option>
+                                <option>Nandi</option>
+                                <option>Bomet</option>
+                                <option>Kericho</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="field-error" id="err-county">Please select your county</div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="su-pass">Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="su-pass" placeholder="Create a strong password"
+                                oninput="checkPasswordStrength(this.value)">
+                            <button class="password-toggle" type="button"
+                                onclick="togglePwd('su-pass',this)">👁</button>
+                        </div>
+                        <div class="password-strength" id="strength-wrap">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strength-fill"></div>
+                            </div>
+                            <div class="strength-label" id="strength-label">Enter a password</div>
+                        </div>
+                        <div class="field-error" id="err-pass">Password must be at least 8 characters</div>
+                    </div>
+
+                    <!-- Confirm password -->
+                    <div class="form-group">
+                        <label for="su-pass2">Confirm Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="su-pass2" placeholder="Repeat your password">
+                            <button class="password-toggle" type="button"
+                                onclick="togglePwd('su-pass2',this)">👁</button>
+                        </div>
+                        <div class="field-error" id="err-pass2">Passwords do not match</div>
+                    </div>
+
+                    <button class="btn-submit" id="btn-signup" onclick="handleSignup()">
+                        <span id="signup-btn-text">Create Account</span>
+                    </button>
+
+                    <p class="terms-note">By creating an account you agree to our <a href="#">Terms of Service</a> and
+                        <a href="#">Privacy Policy</a>.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- end #page-signup -->
+
+
+    <!-- ═══════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════ -->
+    <div id="page-login" class="page">
+        <div class="auth-page">
+
+            <!-- Left brand panel -->
+            <div class="auth-left">
+                <div class="auth-left-content">
+                    <div class="auth-brand-logo" onclick="showPage('home')">🌿 AgriMarketConnect</div>
+                    <h2>Welcome back to smarter farming.</h2>
+                    <p>Your real-time market dashboard, weather alerts, and buyer connections are waiting for you.</p>
+                    <ul class="auth-features-list">
+                        <li><span class="check">✓</span>Live crop prices updated every hour</li>
+                        <li><span class="check">✓</span>Your saved markets &amp; price alerts</li>
+                        <li><span class="check">✓</span>Ongoing buyer conversations</li>
+                        <li><span class="check">✓</span>Personal analytics &amp; trade history</li>
+                    </ul>
+                    <div class="auth-testimonial">
+                        <blockquote>"I source from 200+ farmers on the platform. Pricing is transparent for both sides."
+                        </blockquote>
+                        <div class="auth-testi-author">
+                            <img src="https://market-grow-wise.lovable.app/assets/testimonial-2-DXytLlkc.jpg"
+                                alt="Daniel Otieno">
+                            <div>
+                                <div class="auth-testi-name">Daniel Otieno</div>
+                                <div class="auth-testi-role">Produce Trader, Nairobi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right form panel -->
+            <div class="auth-right">
+                <div class="auth-form-wrap">
+                    <div class="auth-form-header">
+                        <h1>Sign in to your account</h1>
+                        <p>Don't have an account? <a onclick="showPage('signup')">Create one for free</a></p>
+                    </div>
+
+                    <!-- Google login -->
+                    <button class="btn-google" onclick="handleGoogleAuth('login')">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="divider">
+                        <div class="divider-line"></div><span>or sign in with email</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="li-email">Email Address</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">✉️</span>
+                            <input type="email" id="li-email" placeholder="your@email.com">
+                        </div>
+                        <div class="field-error" id="li-err-email">Please enter a valid email address</div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="li-pass">Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="li-pass" placeholder="Your password"
+                                onkeydown="if(event.key==='Enter')handleLogin()">
+                            <button class="password-toggle" type="button"
+                                onclick="togglePwd('li-pass',this)">👁</button>
+                        </div>
+                        <div class="field-error" id="li-err-pass">Please enter your password</div>
+                    </div>
+
+                    <!-- Remember + Forgot -->
+                    <div class="remember-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remember"> Remember me
+                        </label>
+                        <span class="forgot-link" onclick="showForgotToast()">Forgot password?</span>
+                    </div>
+
+                    <button class="btn-submit" id="btn-login" onclick="handleLogin()">
+                        <span id="login-btn-text">Sign In</span>
+                    </button>
+
+                    <p class="terms-note" style="margin-top:1.5rem">
+                        New to AgriMarket Connect? <a onclick="showPage('signup')"
+                            style="color:var(--green-600);font-weight:600;cursor:pointer">Create a free account →</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- end #page-login -->
+
+
+    <!-- SUCCESS OVERLAY -->
+    <div class="success-overlay" id="success-overlay">
+        <div class="success-box">
+            <div class="success-icon" id="success-icon">🌱</div>
+            <h3 id="success-title">Account Created!</h3>
+            <p id="success-msg">Welcome to AgriMarket Connect. You're now part of a 50,000-strong farming community.</p>
+            <button class="btn-success" onclick="closeSuccess()">Go to Dashboard →</button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast"
+        style="position:fixed;bottom:2rem;right:2rem;z-index:9999;background:#166534;color:#fff;padding:0.85rem 1.5rem;border-radius:10px;font-size:0.9rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);opacity:0;transform:translateY(16px);transition:all 0.3s ease;pointer-events:none;">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseConfig.js"></script>
+    <script src="homepage.js">
+
+    </script>
+</body>
+
+</html>

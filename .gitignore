@@ -1,0 +1,5 @@
+# Ignore the local dependencies folder (it can contain thousands of files)
+node_modules/
+
+# Ignore your private environment variable files where you will store your keys
+.env

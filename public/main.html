@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Dashboard Overview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dash.css">
+    <link rel="stylesheet" href="main1.css">
+</head>
+
+<body>
+    <div class="farm-dashboard">
+        <div class="dash-header">
+            <div>
+                <h2>Farm Overview</h2>
+                <p class="text-muted">A snapshot of your crops, scans, and tasks.</p>
+            </div>
+            <button class="btn-scan-action" id="triggerNewScan">New Scan</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-meta">
+                    <span class="stat-icon green">🌱</span>
+                    <span class="arrow-icon"></span>
+                </div>
+                <h3 id="stat-active-crops">0</h3>
+                <p>Active Crops</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-meta">
+                    <span class="stat-icon dark-green">🔬</span>
+                    <span class="arrow-icon"></span>
+                </div>
+                <h3 id="stat-scans">0</h3>
+                <p>Disease Scans</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-meta">
+                    <span class="stat-icon orange">📅</span>
+                    <span class="arrow-icon"></span>
+                </div>
+                <h3 id="stat-tasks">0</h3>
+                <p>Pending Tasks</p>
+            </div>
+            <div class="stat-card" id="card-view-weather" style="cursor: pointer;">
+                <div class="stat-meta">
+                    <span class="stat-icon blue">🌤️</span>
+                    <span class="arrow-icon">→</span>
+                </div>
+                <h3>View</h3>
+                <p>Weather</p>
+            </div>
+        </div>
+
+        <div class="dashboard-details">
+            <div class="details-panel">
+                <div class="panel-header">
+                    <h3>Recent disease scans</h3>
+                    <button class="badge-btn" id="inlineNewScan">New scan</button>
+                </div>
+                <div class="scans-list" id="dashboardScansList">
+                    <p class="empty-text">No disease scans recorded yet.</p>
+                </div>
+            </div>
+
+            <div class="details-panel">
+                <div class="panel-header">
+                    <h3>Upcoming tasks</h3>
+                    <button class="badge-btn secondary">Manage</button>
+                </div>
+                <div class="tasks-list" id="dashboardTasksList">
+                    <p class="empty-text">No pending tasks. Add a task in Activities.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KNOWLEDGE CENTER -->
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-h">
+            <div class="card-title"><span class="title-ic">📚</span> Knowledge Center</div>
+            <button class="btn-ghost">Browse Library →</button>
+        </div>
+        <div class="know-grid">
+            <div class="know-card">
+                <div class="know-ic" style="background:var(--grad-green)">📖</div>
+                <div class="know-t">Disease Guides</div>
+                <div class="know-d">Identify and treat 200+ common crop diseases.</div>
+            </div>
+            <div class="know-card">
+                <div class="know-ic" style="background:var(--grad-orange)">🐛</div>
+                <div class="know-t">Pest Library</div>
+                <div class="know-d">Visual catalog of harmful pests and controls.</div>
+            </div>
+            <div class="know-card">
+                <div class="know-ic" style="background:linear-gradient(135deg,#A78BFA,#7C3AED)">🌍</div>
+                <div class="know-t">Soil Health</div>
+                <div class="know-d">Boost fertility with science-based methods.</div>
+            </div>
+            <div class="know-card">
+                <div class="know-ic" style="background:linear-gradient(135deg,#60A5FA,#2563EB)">💧</div>
+                <div class="know-t">Fertilizer Tips</div>
+                <div class="know-d">Right product, dose & timing for each crop.</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dash.js"></script>
+</body>
+
+</html>

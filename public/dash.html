@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgriMarket — Disease Detection Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dash.css">
+</head>
+
+<body>
+
+    <div class="app">
+        <!-- ============= SIDEBAR ============= -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-logo">🌿</div>
+                <div>
+                    <div class="brand-name">AgriMarket</div>
+                    <div class="brand-sub">Crop Health</div>
+                </div>
+            </div>
+            <div class="nav">
+                <div class="nav-section">Main</div>
+                <div id="btndash" class="nav-item active"><span class="nav-ic">📊</span> Dashboard</div>
+                <div id="btndetect" class="nav-item"><span class="nav-ic">🔬</span> Disease Scanner</div>
+                <div id="btnHistory" class="nav-item"><span class="nav-ic">📜</span> Disease History</div>
+                <div id="nav-crops" class="nav-item"><span class="nav-ic">🌱</span> My Crops</div>
+                <div class="nav-section">Insights</div>
+                <div class="nav-item"><span class="nav-ic">🐛</span> Pest Library</div>
+                <div id="btnweather" class=" nav-item"><span class="nav-ic">⛅</span>Weather Insights
+                </div>
+                <div class="nav-item" id="btnmarket"><span class="nav-ic">💰</span> Market
+                    Prices</div>
+
+                <div id="btnactivities" class="nav-item"><span class="nav-ic">📑</span> activities</div>
+                <div class="nav-section">Account</div>
+                <div class="nav-item" id="settingsBtn"><span class="nav-ic">⚙️</span> Settings</div>
+                <div class="nav-item" id="btnlogout"><span class="nav-ic">🚪</span>logout</div>
+            </div>
+            <div class="profile">
+                <div class="avatar" id="userAvatar">JM</div>
+                <div class="profile-info">
+                    <div id="userChipName">User</div>
+                    <div id="dashLocation">fetching location...📍 </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- ============= MAIN ============= -->
+        <main class="main">
+            <header class="topbar">
+
+                <button class="menu-btn" id="menuBtn">☰</button>
+                <div class="welcome">
+                    <h1>Welcome back, <span id="userWelcomeName">User</span> 👋</h1>
+                    <p>Your crops are looking promising today.</p>
+                </div>
+                <div class="search">
+                    <span>🔍</span>
+                    <input placeholder="Search diseases, crops, treatments..." />
+                </div>
+                <div class="top-actions">
+                    <div class="weather-chip" id="dashLocationName">🔄 Loading local weather...</div>
+                    <button class="icon-btn" title="Notifications">🔔<span class="dot"></span></button>
+
+                </div>
+            </header>
+            <div id="main-content"></div>
+
+        </main>
+    </div>
+
+    <!-- ============= CHAT ============= -->
+    <button class="chat-fab" id="chatFab" title="AI Assistant">💬<span class="dot"></span></button>
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-h">
+            <div class="avatar"> <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUWFNMEQ8eUmhyoxrVDZqO0rsle7jh0JTn2zZE1bv0yQ&s=10"
+                    alt="AgriBot Profile"
+                    style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; flex-shrink: 0; align-self: flex-start; margin-top: 2px; border: 1px solid #e2e8f0;">
+            </div>
+            <div class="chat-h-info">
+                <div class="chat-h-t">AgriBot Assistant</div>
+                <div class="chat-h-s">Powered by AgriConnect</div>
+            </div>
+            <button class="chat-close" id="chatClose">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody"
+            style="display: flex; flex-direction: column; overflow-y: auto; padding: 12px; gap: 12px; box-sizing: border-box;">
+        </div>
+        <div class="chat-input">
+            <input id="chatInput" placeholder="Ask about diseases, crops, treatments..." />
+            <button class="chat-send" id="chatSend">➤</button>
+        </div>
+    </div>
+
+
+
+
+    <script src=" https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <script src="supabaseConfig.js"></script>
+    <script src="dash.js"> </script>
+    <script src="weather.js"></script>
+
+    <script>
+        // Use DOMContentLoaded instead of window.load so it triggers instantly when HTML is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            // Toggle sidebar drawer on hamburger click
+            if (menuBtn && sidebar) {
+                menuBtn.onclick = (e) => {
+                    e.stopPropagation(); // Prevents bubbling issues
+                    sidebar.classList.toggle('open');
+                };
+            }
+
+            // Handle navigation link active state switching and responsive auto-close
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(x => x.classList.remove('active'));
+                    item.classList.add('active');
+
+                    if (window.innerWidth < 820 && sidebar) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
