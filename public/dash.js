@@ -1,7 +1,4 @@
-/* ==========================================================================
-   1. UTIL & HELPERS
-   ========================================================================== */
-let conversationHistory = [];
+
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -939,6 +936,9 @@ async function renderDynamicChatGreeting() {
  * Handles UI injection states, manages a spinning loading indicator, 
  * and streams data token-by-token from the local Node.js backend server.
  */
+// Initialize a global history array to store the conversation memory context
+let chatHistory = [];
+
 async function handleUserMessageSend() {
     const inputField = document.getElementById('chatInput');
     const chatBody = document.getElementById('chatBody');
@@ -952,6 +952,9 @@ async function handleUserMessageSend() {
     // Append User message bubble cleanly
     appendChatMessageElement(promptText, 'user');
     scrollChatToBottom();
+
+    // 1. Save the new user prompt into our running memory array
+    chatHistory.push({ role: "user", content: promptText });
 
     // 1. INJECT THE SPINNING WHEEL INDICATOR ROW
     const spinnerRow = document.createElement('div');
@@ -968,21 +971,17 @@ async function handleUserMessageSend() {
     scrollChatToBottom();
 
     let textTarget = null;
+    let fullBotResponse = ""; // Accumulator string to capture the full AI response
 
     try {
-        const currentCropsCount = FarmState.cropsList ? FarmState.cropsList.filter(c => c.status === 'Growing').length : 0;
-        const currentTasksCount = FarmState.tasksList ? FarmState.tasksList.length : 0;
-
-        // Dispatches payload straight to your secure local Express routing endpoint
+        // Dispatches the entire conversation history array straight to your secure backend
         const response = await fetch("/api/agribot/chat", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                message: promptText,
-                cropsCount: currentCropsCount,
-                tasksCount: currentTasksCount
+                chatHistory: chatHistory // Handing over the full history array instead of a single message string
             })
         });
 
@@ -1009,12 +1008,14 @@ async function handleUserMessageSend() {
                     try {
                         const parsedData = JSON.parse(cleanedLine.replace(/^data: /, ""));
 
-                        // Check if backend encountered an upstream API key or connectivity error
                         if (parsedData.error) throw new Error(parsedData.error);
 
                         const deltaText = parsedData.choices[0]?.delta?.content;
 
                         if (deltaText) {
+                            // Accumulate the streaming fragments into our memory holder
+                            fullBotResponse += deltaText;
+
                             // 2. SWAP OUT THE SPINNER ROW ONCE THE FIRST TEXT PIECE LANDS
                             if (isFirstToken) {
                                 spinnerRow.remove(); // Drop the spinning row element completely
@@ -1038,6 +1039,11 @@ async function handleUserMessageSend() {
                     }
                 }
             }
+        }
+
+        // 2. SUCCESS PATH: Save the complete assistant response back into the history array for context
+        if (fullBotResponse) {
+            chatHistory.push({ role: "assistant", content: fullBotResponse });
         }
 
     } catch (err) {
@@ -1107,70 +1113,7 @@ function appendChatMessageElement(text, senderClass) {
     return rowWrapper.querySelector('.msg');
 }
 
-async function sendMessageToAgriBot(userMessageText) {
-    if (!userMessageText.trim()) return;
 
-    // 2. Append the user's new message to your running history array
-    conversationHistory.push({ role: "user", content: userMessageText });
-
-    try {
-        // 3. Send the FULL history array to your server endpoint
-        const response = await fetch('/api/agribot/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chatHistory: conversationHistory // Send the whole history instead of just one message
-            })
-        });
-
-        // ... your existing streaming code setup (reader/decoder loop) ...
-        let botResponseText = "";
-
-        // Inside your streaming while(true) loop where you receive text:
-        // botResponseText += decodedChunk; 
-
-        // 4. Once the stream is COMPLETELY finished (done === true), 
-        // save the bot's final answer to the history so it remembers it next time!
-        conversationHistory.push({ role: "assistant", content: botResponseText });
-
-    } catch (error) {
-        console.error("Chat error:", error);
-    }
-}
-// 1. Hook into your HTML elements using the exact IDs provided
-const chatInput = document.getElementById('chatInput');
-const chatSend = document.getElementById('chatSend');
-
-// 2. This helper function extracts the text and triggers your main chat engine
-function triggerMessageDelivery() {
-    const messageText = chatInput.value.trim();
-
-    // Only send if the input isn't empty spaces
-    if (messageText !== "") {
-
-        // CALL YOUR FUNCTION HERE!
-        sendMessageToAgriBot(messageText);
-
-        // Instantly clear the text box so the user can type their next question
-        chatInput.value = '';
-    }
-}
-
-// 3. Listen for a mouse click on the "➤" button
-chatSend.addEventListener('click', triggerMessageDelivery);
-
-// 4. Listen for the "Enter" key being pressed down inside the input field
-chatInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Stop any default page reload behaviors
-        triggerMessageDelivery();
-    }
-});
-/**
- * Layout position focus updates anchor helper engine
- */
 function scrollChatToBottom() {
     const chatBody = document.getElementById('chatBody');
     if (chatBody) {
