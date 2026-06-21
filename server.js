@@ -14,6 +14,7 @@ app.use(express.static(__dirname + '/public'));
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY; // Keep your secret key safe here!
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
+
 /**
  * Endpoint to securely proxy and stream chat completions from NVIDIA NIM to the browser
  */
@@ -81,6 +82,47 @@ Provide highly practical guidance. Respond in a natural, warm, human-like writin
     }
 });
 
+/**
+ * Secure proxy endpoint for fetching regional weather and geolocation metrics
+ */
+app.post('/api/weather', async (req, res) => {
+    try {
+        const { lat, lon } = req.body;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: "Missing latitude or longitude parameters." });
+        }
+
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+
+        // Construct backend OpenWeather strings securely
+        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+        const geoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
+
+        // Fire both operations in a fast, parallel pipeline
+        const [forecastRes, geoRes] = await Promise.all([
+            fetch(forecastUrl),
+            fetch(geoUrl)
+        ]);
+
+        if (!forecastRes.ok || !geoRes.ok) {
+            return res.status(500).json({ error: "Failed fetching data from OpenWeather upstream channels." });
+        }
+
+        const forecastData = await forecastRes.json();
+        const geoData = await geoRes.json();
+
+        // Send back a clean object containing both items to your frontend weather.js
+        res.json({
+            forecast: forecastData,
+            geo: geoData
+        });
+
+    } catch (error) {
+        console.error("Weather routing crash error:", error);
+        res.status(500).json({ error: "Internal Server Weather Processing Error" });
+    }
+});
 // Fire up the Node.js development server
 app.listen(PORT, () => {
     console.log(`🚀 AgriBot Node Backend running securely at http://localhost:${PORT}`);

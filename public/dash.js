@@ -838,13 +838,6 @@ async function fetchUserScansFromSupabase() {
    6. AGRIBOT ASSISTANT (NVIDIA NIM AI PIPELINE - FREE CREDITS TIER)
    ========================================================================== */
 
-const AI_CONFIG = {
-    // 1. Paste your NVIDIA API key (starts with nvapi-) inside these quotation marks
-    NVIDIA_API_KEY: "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",
-    BASE_URL: "https://integrate.api.nvidia.com/v1/chat/completions",
-    MODEL_NAME: "meta/llama-3.3-70b-instruct" // Fast, highly accurate open-source model
-};
-
 /**
  * Initializes and binds interactive mechanics for the floating AgriBot widget
  */

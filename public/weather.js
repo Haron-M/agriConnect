@@ -9,8 +9,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 600);
 });
 
-const OPENWEATHER_API_KEY = "e61cf80734ae1e65c736d627e755ea6f";
-
 const cdnAssetIcons = {
     sunny: "https://cdn-icons-png.flaticon.com/512/869/869869.png",
     mostlySunny: "https://cdn-icons-png.flaticon.com/512/1163/1163765.png",
@@ -33,7 +31,6 @@ async function bootstrapPipeline() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session?.user?.user_metadata) {
                 const metadata = session.user.user_metadata;
-                // If the user has specific coordinates saved in metadata, map them here
                 if (metadata.latitude && metadata.longitude) {
                     fallbackLat = parseFloat(metadata.latitude);
                     fallbackLon = parseFloat(metadata.longitude);
@@ -61,21 +58,31 @@ async function bootstrapPipeline() {
     }
 }
 
+/**
+ * Dispatches coordinates to the local Node backend instead of exposing the API key online
+ */
 async function fetchWeatherTelemetry(lat, lon) {
     try {
-        // 1. Dual fetch payload streams concurrently to maximize loading speed
-        const weatherPromise = fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`);
-        const geoPromise = fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${OPENWEATHER_API_KEY}`);
+        // Dispatches coordinates to your single secure Node.js proxy endpoint
+        const response = await fetch('/api/weather', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ lat: lat, lon: lon })
+        });
 
-        const [weatherRes, geoRes] = await Promise.all([weatherPromise, geoPromise]);
-        const payload = await weatherRes.json();
-        const geoData = await geoRes.json();
+        if (!response.ok) throw new Error(`Backend weather proxy returned an error state: ${response.status}`);
+
+        // The unified response payload combined by the backend
+        const { forecast, geo } = await response.json();
 
         // 2. Extract precision administrative layers matching reverse geocode layout
-        let structuralLocationName = payload.city.name;
-        let structuralLocation = payload.city.name;
-        if (geoData && geoData.length > 0) {
-            const details = geoData[0];
+        let structuralLocationName = forecast.city.name;
+        let structuralLocation = forecast.city.name;
+
+        if (geo && geo.length > 0) {
+            const details = geo[0];
             const localizedArea = details.local_names?.en || details.name;
             const countyOrState = details.state ? `, ${details.state},KE` : '';
             const county = details.state ? ` ${details.state}, KE` : '';
@@ -94,15 +101,15 @@ async function fetchWeatherTelemetry(lat, lon) {
 
         // 4. Map data arrays seamlessly into downstream visualization targets
         weatherDataSet = {
-            timeline: payload.list.map(item => {
+            timeline: forecast.list.map(item => {
                 const d = new Date(item.dt * 1000);
                 return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:00`;
             }),
-            temperature: payload.list.map(item => item.main.temp),
-            humidity: payload.list.map(item => item.main.humidity),
-            pop: payload.list.map(item => Math.round((item.pop || 0) * 100)),
-            rainVolume: payload.list.map(item => item.rain ? (item.rain['3h'] || 0) : 0),
-            description: payload.list.map(item => item.weather[0].description)
+            temperature: forecast.list.map(item => item.main.temp),
+            humidity: forecast.list.map(item => item.main.humidity),
+            pop: forecast.list.map(item => Math.round((item.pop || 0) * 100)),
+            rainVolume: forecast.list.map(item => item.rain ? (item.rain['3h'] || 0) : 0),
+            description: forecast.list.map(item => item.weather[0].description)
         };
 
         // 5. Fire core UI engine updates
@@ -161,11 +168,9 @@ function renderNaturalLanguageBanners() {
         rainEndIndex = lookaheadSteps;
     }
 
-    // Unhide the container wrapper so it can display both states seamlessly
     container.style.display = "block";
 
     if (rainStartIndex !== -1) {
-        // === STATE 1: RAIN PREDICTED ===
         const startTimeStr = weatherDataSet.timeline[rainStartIndex];
         const startDate = new Date(startTimeStr);
         const startHour = startDate.getHours();
@@ -190,11 +195,11 @@ function renderNaturalLanguageBanners() {
         titleNode.innerText = `Rain expected ${timePeriod}`;
         bodyNode.innerText = `Intermittent showers are possible between ${displayStartTime} and ${displayEndTime} (a ${durationHours}-hour window).`;
     } else {
-        // === STATE 2: NO RAIN PREDICTED ===
         titleNode.innerText = "No rain expected today";
         bodyNode.innerText = "Clear skies or stable conditions are projected for the next 24 hours. Enjoy your day!";
     }
 }
+
 function syncSidebarDisplayMetrics(index) {
     const m = weatherDataSet;
     if (!m) return;
@@ -282,16 +287,13 @@ function animateMultiAxisLineGraph() {
     grids.innerHTML = '';
     lineChartPointsArray = [];
 
-    // Define a clear, unified chart ceiling max (100 accommodates 0-100% humidity perfectly)
     const chartYMax = 100;
 
-    // Shared conversion formula: converts any raw value (temp or humidity) to exact SVG pixel heights
     function valueToSvgY(val) {
         const ratio = val / chartYMax;
         return pad.top + mainHeight - (ratio * mainHeight);
     }
 
-    // Render Y-Axis labels dynamically based on our unified max (0 to 100)
     const verticalTicks = [0, 20, 40, 60, 80, 100];
     verticalTicks.forEach(tick => {
         const yPos = valueToSvgY(tick);
@@ -301,11 +303,8 @@ function animateMultiAxisLineGraph() {
 
     const deltaStepX = mainWidth / (sampleWindow - 1);
 
-    // Calculate line coordinates using the shared valueToSvgY scaler
     subsetTimes.forEach((timeStr, i) => {
         const x = pad.left + (i * deltaStepX);
-
-        // BOTH profiles now map directly to their true numeric positions on the 0-100 grid space
         const yTemp = valueToSvgY(subsetTemps[i]);
         const yHumid = valueToSvgY(subsetHumids[i]);
 
@@ -328,7 +327,6 @@ function animateMultiAxisLineGraph() {
     lineChartPointsArray.forEach(pt => fillT += ` L ${pt.x} ${pt.yTemp}`);
     fillT += ` L ${lineChartPointsArray[lineChartPointsArray.length - 1].x} ${pad.top + mainHeight} Z`;
 
-    // Shading adjustment: Fill area expands clean between temperature line and humidity line bounds
     let fillH = `M ${lineChartPointsArray[0].x} ${lineChartPointsArray[0].yTemp}`;
     lineChartPointsArray.forEach(pt => fillH += ` L ${pt.x} ${pt.yHumid}`);
     for (let i = lineChartPointsArray.length - 1; i >= 0; i--) {
@@ -362,7 +360,7 @@ function animateMultiAxisLineGraph() {
         fill.style.opacity = '0';
         fill.style.transition = 'none';
         fill.getBoundingClientRect();
-        fill.style.transition = 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1)';
+        path.style.transition = 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1)';
         fill.style.opacity = '1';
     });
 
@@ -445,14 +443,13 @@ function renderRainfallBarChart() {
     svg.setAttribute('width', width);
     const height = 230;
 
-    const pad = { top: 25, right: 20, bottom: 35, left: 55 }; // Left pad widened to clear decimals
+    const pad = { top: 25, right: 20, bottom: 35, left: 55 };
     const graphWidth = width - pad.left - pad.right;
     const graphHeight = height - pad.top - pad.bottom;
 
     grids.innerHTML = '';
     barsContainer.innerHTML = '';
 
-    // 1. Group raw timeline entries into daily rainfall totals
     let groupedSlots = {};
     weatherDataSet.timeline.forEach((timeStr, idx) => {
         const dateKey = timeStr.split('T')[0];
@@ -462,7 +459,6 @@ function renderRainfallBarChart() {
 
     const keys = Object.keys(groupedSlots).slice(0, 7);
 
-    // 2. Find the highest aggregate volume among the 7 days
     let maxRainfallValue = 0;
     keys.forEach(key => {
         const dailyTotal = groupedSlots[key].reduce((a, b) => a + b, 0);
@@ -471,38 +467,30 @@ function renderRainfallBarChart() {
         }
     });
 
-    // Fallback default frame space limit if there is no rain expected at all
     if (maxRainfallValue === 0) {
         maxRainfallValue = 10;
     }
 
-    // 3. Establish upper boundary cap exactly 0.3% higher than peak value
     const dynamicYMax = maxRainfallValue * 1.003;
 
-    // 4. Generate dynamic linear ticks split evenly across 4 layout references
     const ticksCount = 4;
     for (let i = 0; i <= ticksCount; i++) {
         const currentTickVal = (dynamicYMax / ticksCount) * i;
         const ratio = currentTickVal / dynamicYMax;
         const y = pad.top + graphHeight - (ratio * graphHeight);
 
-        // Draw path grids
         grids.innerHTML += `<line class="grid-line-dashed" x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" />`;
-        // Draw text data scale markings (Formatted cleanly to 1 decimal place)
         grids.innerHTML += `<text class="axis-text" x="${pad.left - 12}" y="${y + 4}" text-anchor="end">${currentTickVal.toFixed(1)} mm</text>`;
     }
 
     const columnWidth = graphWidth / keys.length;
     const bubble = document.getElementById('tooltip-bar-chart');
 
-    // 5. Construct Vector columns using scaled calculations
     keys.forEach((key, i) => {
         const totalRainVolume = groupedSlots[key].reduce((a, b) => a + b, 0);
         const dayLabel = new Date(key).toLocaleDateString('en-US', { weekday: 'short' });
 
-        // Calculate heights precisely relative to the customized dynamic ceiling
         const barHeight = (totalRainVolume / dynamicYMax) * graphHeight;
-
         const barWidth = columnWidth - 8;
         const x = pad.left + (i * columnWidth) + 4;
         const y = pad.top + graphHeight - barHeight;
@@ -515,7 +503,6 @@ function renderRainfallBarChart() {
             <text class="axis-text" x="${x + (barWidth / 2)}" y="${height - 12}" text-anchor="middle">${dayLabel}</text>
         `;
 
-        // Safely map hover interactive hooks right after vectors finish rendering animations
         setTimeout(() => {
             const elements = barsContainer.querySelectorAll('.bar-rect-node');
             elements.forEach(bar => {
