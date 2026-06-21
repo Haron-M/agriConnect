@@ -887,10 +887,13 @@ async function renderDynamicChatGreeting() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (session && session.user) {
             // Pull name metadata attribute or user email prefix safely
-            userName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+            let rawName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+
+            // Extract ONLY the first name (split by spaces and take the first item)
+            userName = rawName.trim().split(' ')[0];
 
             // Capitalize the first letter neatly for display
-            userName = userName.charAt(0).toUpperCase() + userName.slice(1);
+            userName = userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase();
         }
     } catch (e) {
         console.warn("Could not read user profile metadata for chat greeting:", e);
