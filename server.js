@@ -20,12 +20,15 @@ const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
  */
 app.post('/api/agribot/chat', async (req, res) => {
     try {
-        const { message } = req.body;
+        // 1. Destructure chatHistory instead of message!
+        const { chatHistory } = req.body;
 
-        if (!message) {
-            return res.status(400).json({ error: "Missing required chat message parameter." });
+        // Validation fallback guardrail
+        if (!chatHistory || !Array.isArray(chatHistory) || chatHistory.length === 0) {
+            return res.status(400).json({ error: "Missing required chatHistory parameter or array is empty." });
         }
 
+        // Configure system rules context natively on your server to match your real website layout
         const systemPrompt = `You are AgriBot, the dedicated expert AI assistant embedded into the AgriMarket Connect (AgriHealth) dashboard system.
 
 CRITICAL GUARDRAIL - TOP PRIORITY:
@@ -61,6 +64,12 @@ Here is the exact structure of the website layout the user is currently interact
 
 Respond in a natural, warm, human-like writing tone with proper punctuation and spacing. Keep explanations short, practical, and highly concise.`;
 
+        // 2. Combine your system instruction string smoothly with your conversation history array
+        const messagesPayload = [
+            { role: "system", content: systemPrompt },
+            ...chatHistory // This cleanly unpacks all previous turns so the bot has memory context!
+        ];
+
         // Set up specific Server-Sent Events headers for immediate streaming back to frontend
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
@@ -75,11 +84,8 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
             },
             body: JSON.stringify({
                 model: "meta/llama-3.3-70b-instruct",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: message }
-                ],
-                temperature: 0.5, // Slighly reduced for stricter adherence to instructions
+                messages: messagesPayload, // Pass the combined array here!
+                temperature: 0.5,
                 max_tokens: 1024,
                 stream: true // Instructs NVIDIA to stream token-by-token
             })
@@ -111,7 +117,6 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
         res.end();
     }
 });
-
 /**
  * Secure proxy endpoint for fetching regional weather and geolocation metrics
  */
