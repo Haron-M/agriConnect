@@ -195,15 +195,22 @@ Be direct, warm, and highly practical. Avoid vague medical jargon. Keep descript
 /**
  * Secure proxy endpoint for fetching regional weather and geolocation metrics
  */
-app.post('/api/weather', async (req, res) => {
+// Changed from app.post to app.get to match your frontend weather.js fetch call
+app.get('/api/weather', async (req, res) => {
     try {
-        const { lat, lon } = req.body;
+        // 1. Read parameters from req.query (GET requests pass data via URL strings)
+        const { lat, lon } = req.query;
 
+        // Fallback or validation step
         if (!lat || !lon) {
-            return res.status(400).json({ error: "Missing latitude or longitude parameters." });
+            return res.status(400).json({ error: "Missing latitude or longitude query parameters." });
         }
 
         const apiKey = process.env.OPENWEATHER_API_KEY;
+        if (!apiKey) {
+            console.error("Missing OPENWEATHER_API_KEY inside your .env configuration file.");
+            return res.status(500).json({ error: "Server API configuration missing." });
+        }
 
         // Construct backend OpenWeather strings securely
         const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
@@ -215,7 +222,9 @@ app.post('/api/weather', async (req, res) => {
             fetch(geoUrl)
         ]);
 
+        // Guard against upstream errors cleanly
         if (!forecastRes.ok || !geoRes.ok) {
+            console.error(`OpenWeather bad response. Forecast: ${forecastRes.status}, Geo: ${geoRes.status}`);
             return res.status(500).json({ error: "Failed fetching data from OpenWeather upstream channels." });
         }
 
@@ -223,14 +232,14 @@ app.post('/api/weather', async (req, res) => {
         const geoData = await geoRes.json();
 
         // Send back a clean object containing both items to your frontend weather.js
-        res.json({
+        return res.json({
             forecast: forecastData,
             geo: geoData
         });
 
     } catch (error) {
         console.error("Weather routing crash error:", error);
-        res.status(500).json({ error: "Internal Server Weather Processing Error" });
+        return res.status(500).json({ error: "Internal Server Weather Processing Error", details: error.message });
     }
 });
 
