@@ -1598,9 +1598,9 @@ a {
     position: fixed;
     bottom: 96px;
     right: 24px;
-    width: 380px;
+    width: 450px;
     max-width: calc(100vw - 40px);
-    height: 540px;
+    height: 600px;
     max-height: calc(100vh - 130px);
     background: #fff;
     border-radius: 20px;
