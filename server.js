@@ -14,7 +14,32 @@ app.use(express.static(__dirname + '/public'));
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY; // Keep your secret key safe here!
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
+// =========================================================
+// 📚 PEST LIBRARY DATA INTEGRATION: FETCH FROM SUPABASE
+// =========================================================
+const { createClient } = require("@supabase/supabase-js");
 
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://mlvvtdqxucqqolcngkrg.supabase.co";
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_fjGcSPF1IQlqY06J3DcKMA_kPp-ATFB";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+app.get("/api/library-items", async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("disease_scans")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Return the clean row dataset to populate your page cards
+        return res.json(data);
+    } catch (err) {
+        console.error("Error pulling library elements from database:", err);
+        return res.status(500).json({ error: "Failed fetching stored diagnoses from the database layer." });
+    }
+});
 /**
  * Endpoint to securely proxy and stream chat completions from NVIDIA NIM to the browser
  */
