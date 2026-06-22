@@ -1962,6 +1962,7 @@ a {
     }
 
     .sidebar {
+
         position: fixed;
         width: 260px;
         left: 0;
@@ -1993,7 +1994,17 @@ a {
         flex-wrap: wrap;
     }
 
+    #main-content {
+        margin-top: -30px;
+    }
 
+    .search {
+        visibility: hidden;
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+        margin-top: -12px;
+    }
 
     .weather-chip {
         display: none;
@@ -2054,6 +2065,11 @@ a {
         grid-template-columns: 1fr;
     }
 
+    .search {
+        visibility: hidden;
+        margin-top: -12px;
+        z-index: 0;
+    }
 
     .sidebar {
         z-index: 100;
@@ -2065,5 +2081,11 @@ a {
 
     .user-chip {
         visibility: hidden;
+    }
+
+    .topbar {
+        padding: 12px 16px;
+        margin-bottom: -50px;
+        flex-wrap: wrap;
     }
 }
