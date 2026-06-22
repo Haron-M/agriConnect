@@ -735,9 +735,8 @@ async function initializeDynamicPestLibrary() {
 
     let allScannedItems = []; // Keeps an in-memory array of data records
 
-    // 1. Fetching data securely from your Dashboard Backend Server
+    // ✅ NEW SECURE WAY: Hit your dashboard server's endpoint
     try {
-        // Fetches from the local /api/library-items route you added to your dashboard server
         const response = await fetch('/api/library-items');
 
         if (!response.ok) {
