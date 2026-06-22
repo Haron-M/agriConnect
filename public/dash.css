@@ -1993,12 +1993,7 @@ a {
         flex-wrap: wrap;
     }
 
-    .search {
-        order: 3;
-        flex-basis: 100%;
-        max-width: none;
-        margin-top: -12px;
-    }
+
 
     .weather-chip {
         display: none;
@@ -2059,10 +2054,6 @@ a {
         grid-template-columns: 1fr;
     }
 
-    .search {
-        margin-top: -12px;
-        z-index: 0;
-    }
 
     .sidebar {
         z-index: 100;
