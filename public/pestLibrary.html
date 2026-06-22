@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pestlibrary</title>
+    <style>
+        :root {
+            --primary-green: #2e6f40;
+            /* Matching your sidebar green theme */
+            --text-dark: #333;
+            --text-light: #666;
+            --bg-light: #f9f9f9;
+            --border-color: #e0e0e0;
+        }
+
+        :root {
+            --primary-green: #2e6f40;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e0e0e0;
+        }
+
+        .pest-library-container {
+            padding: 24px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .library-header h2 {
+            color: var(--primary-green);
+            margin-bottom: 6px;
+        }
+
+        .library-header p {
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        /* Search Bar Styling */
+        .search-filter-wrapper {
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        #library-search {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        #library-search:focus {
+            border-color: var(--primary-green);
+        }
+
+        /* Pests Layout Grid */
+        .pests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* Individual Dynamic Card */
+        .pest-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .pest-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .pest-image {
+            position: relative;
+            height: 190px;
+            background: #eaeaea;
+        }
+
+        .pest-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .crop-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(46, 111, 64, 0.9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .pest-info {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .pest-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 19px;
+            color: var(--text-dark);
+        }
+
+        .scientific-name {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .info-section {
+            margin-bottom: 14px;
+        }
+
+        .info-section h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .info-section p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.45;
+        }
+
+        /* Feedback Messages */
+        .library-loading,
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pest-library-container">
+        <header class="library-header">
+            <h2>Pest & Disease Library</h2>
+            <p>Search through all scanned field diagnoses and control metrics.</p>
+        </header>
+
+        <div class="search-filter-wrapper">
+            <input type="text" id="library-search" placeholder="🔍 Search by crop name, plant type, pest, or disease..."
+                autocomplete="off">
+        </div>
+
+        <div class="pests-grid" id="pests-grid">
+            <div class="library-loading">Loading scanned data repository...</div>
+        </div>
+    </div>
+</body>
+
+</html>

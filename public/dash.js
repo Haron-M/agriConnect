@@ -3,6 +3,7 @@
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
+
 const toast = (m) => {
     const t = $('#toast');
     if (t) {
@@ -698,26 +699,138 @@ document.getElementById('btnHistory')?.addEventListener('click', () => {
     viewAllScansPage();
 });
 
-/* ==========================================================================
-   6. PAGE ROUTING & IFRAMES
-   ========================================================================== */
+// Ensure your Supabase client initialization is accessible globally or within this scope
+// const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
+
 async function loadPage(page) {
     try {
         const response = await fetch(page);
         const data = await response.text();
         const mainContent = document.getElementById("main-content");
+
         if (mainContent) {
             mainContent.innerHTML = data;
+
+            // 1. Existing check for main dashboard
             if (page === "main.html") {
                 updateDashboardUI();
-                fetchUserCropsFromSupabase()
+                fetchUserCropsFromSupabase();
                 bindDashboardActionHooks();
+            }
+
+            // 2. Initialize pest library hooks right after it injects into the DOM
+            if (page === "pestLibrary.html") {
+                initializeDynamicPestLibrary();
             }
         }
     } catch (err) {
         console.error("Failed to dynamically load partial workspace container view:", err);
     }
 }
+
+// Updated scoped function querying Supabase Directly
+async function initializeDynamicPestLibrary() {
+    const pestsGrid = document.getElementById("pests-grid");
+    const searchInput = document.getElementById("library-search");
+
+    let allScannedItems = []; // Keeps an in-memory array of data records
+
+    // 1. Direct Database Fetching using Supabase Client Engine
+    try {
+        // Query the 'disease_scans' table sorted by the most recent records first
+        const { data, error } = await supabase
+            .from('disease_scans')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        allScannedItems = data || [];
+        renderCards(allScannedItems);
+
+    } catch (error) {
+        console.error("Error reading database collection:", error.message || error);
+        if (pestsGrid) {
+            pestsGrid.innerHTML = `<div class="no-results">Failed to synchronize database history. Check connection logs.</div>`;
+        }
+        return;
+    }
+
+    // 2. Render HTML Cards dynamically based on Supabase snake_case columns
+    function renderCards(items) {
+        if (!pestsGrid) return;
+        pestsGrid.innerHTML = ""; // Wipe container clear
+
+        if (items.length === 0) {
+            pestsGrid.innerHTML = `<div class="no-results">No matches or scanned history logs found.</div>`;
+            return;
+        }
+
+        items.forEach(item => {
+            // Mapping schema properties cleanly with explicit fallbacks
+            const crop = item.crop_targeted || "Unknown Crop";
+            const name = item.disease_name || "Identified Pathology";
+            const symptoms = item.observed_symptoms || "No diagnostic notes available.";
+            const controls = item.recommended_controls || "No counteraction remediation guidelines found.";
+            const image = item.image_url || "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500";
+
+            const cardHTML = `
+                <div class="pest-card" data-crop="${crop.toLowerCase()}" data-name="${name.toLowerCase()}">
+                    <div class="pest-image">
+                        <img src="${image}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500'">
+                        <span class="crop-badge">${crop}</span>
+                    </div>
+                    <div class="pest-info">
+                        <h3>${name}</h3>
+                        <p class="scientific-name">${item.scientific_name || ''}</p>
+                        
+                        <div class="info-section">
+                            <h4>⚠️ Symptoms / Damage:</h4>
+                            <p>${symptoms}</p>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>🛡️ Control Measures:</h4>
+                            <p>${controls}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            pestsGrid.insertAdjacentHTML("beforeend", cardHTML);
+        });
+    }
+
+    // 3. Real-time Search Event Listener (Filters rows instantly)
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+
+            const filteredItems = allScannedItems.filter(item => {
+                const cropMatch = (item.crop_targeted || "").toLowerCase().includes(query);
+                const nameMatch = (item.disease_name || "").toLowerCase().includes(query);
+                const symptomsMatch = (item.observed_symptoms || "").toLowerCase().includes(query);
+
+                return cropMatch || nameMatch || symptomsMatch;
+            });
+
+            renderCards(filteredItems);
+        });
+    }
+}
+
+// Cross-window sync trigger for when scanner view changes update the layout state
+window.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "REFRESH_PEST_LIBRARY") {
+        console.log("Global refresh trigger captured. Re-syncing database table state...");
+        const pestsGrid = document.getElementById("pests-grid");
+        if (pestsGrid) {
+            initializeDynamicPestLibrary();
+        }
+    }
+});
+document.getElementById('btnpest')?.addEventListener('click', () => {
+    loadPage("pestLibrary.html")
+});
 
 function routeToDetectionModule() {
     const mainContent = document.getElementById('main-content');
@@ -756,6 +869,7 @@ document.getElementById('btnweather')?.addEventListener('click', routeToWeatherM
 document.getElementById('btndash')?.addEventListener('click', () => loadPage("main.html"));
 document.getElementById('btnactivities')?.addEventListener('click', loadActivitiesPage);
 document.getElementById('btnlogout')?.addEventListener('click', () => window.location.href = "index.html");
+
 
 document.getElementById('btnmarket')?.addEventListener('click', () => {
     const mainContent = document.getElementById('main-content');
