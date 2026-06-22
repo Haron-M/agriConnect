@@ -728,35 +728,35 @@ async function loadPage(page) {
     }
 }
 
-// Updated scoped function querying Supabase Directly
+// Updated scoped function querying your Dashboard Backend Endpoint Directly
 async function initializeDynamicPestLibrary() {
     const pestsGrid = document.getElementById("pests-grid");
     const searchInput = document.getElementById("library-search");
 
     let allScannedItems = []; // Keeps an in-memory array of data records
 
-    // 1. Direct Database Fetching using Supabase Client Engine
+    // 1. Fetching data securely from your Dashboard Backend Server
     try {
-        // Query the 'disease_scans' table sorted by the most recent records first
-        const { data, error } = await supabase
-            .from('disease_scans')
-            .select('*')
-            .order('created_at', { ascending: false });
+        // Fetches from the local /api/library-items route you added to your dashboard server
+        const response = await fetch('/api/library-items');
 
-        if (error) throw error;
+        if (!response.ok) {
+            throw new Error(`Server returned a bad status code: ${response.status}`);
+        }
 
+        const data = await response.json();
         allScannedItems = data || [];
         renderCards(allScannedItems);
 
     } catch (error) {
-        console.error("Error reading database collection:", error.message || error);
+        console.error("Error reading database collection via backend API:", error.message || error);
         if (pestsGrid) {
             pestsGrid.innerHTML = `<div class="no-results">Failed to synchronize database history. Check connection logs.</div>`;
         }
         return;
     }
 
-    // 2. Render HTML Cards dynamically based on Supabase snake_case columns
+    // 2. Render HTML Cards dynamically based on schema columns
     function renderCards(items) {
         if (!pestsGrid) return;
         pestsGrid.innerHTML = ""; // Wipe container clear
@@ -772,7 +772,11 @@ async function initializeDynamicPestLibrary() {
             const name = item.disease_name || "Identified Pathology";
             const symptoms = item.observed_symptoms || "No diagnostic notes available.";
             const controls = item.recommended_controls || "No counteraction remediation guidelines found.";
-            const image = item.image_url || "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500";
+
+            // Catch both null paths and your old "EMPTY" placeholders safely
+            const image = (item.image_url && item.image_url !== "EMPTY")
+                ? item.image_url
+                : "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500";
 
             const cardHTML = `
                 <div class="pest-card" data-crop="${crop.toLowerCase()}" data-name="${name.toLowerCase()}">
@@ -802,7 +806,8 @@ async function initializeDynamicPestLibrary() {
 
     // 3. Real-time Search Event Listener (Filters rows instantly)
     if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
+        // Wipe old listeners by cloning the node if needed, or simply append cleanly
+        searchInput.oninput = (e) => {
             const query = e.target.value.toLowerCase().trim();
 
             const filteredItems = allScannedItems.filter(item => {
@@ -814,9 +819,12 @@ async function initializeDynamicPestLibrary() {
             });
 
             renderCards(filteredItems);
-        });
+        };
     }
 }
+
+// Initial fire on document load
+document.addEventListener("DOMContentLoaded", initializeDynamicPestLibrary);
 
 // Cross-window sync trigger for when scanner view changes update the layout state
 window.addEventListener("message", (event) => {
