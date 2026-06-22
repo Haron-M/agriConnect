@@ -710,6 +710,7 @@ async function loadPage(page) {
             mainContent.innerHTML = data;
             if (page === "main.html") {
                 updateDashboardUI();
+                fetchUserCropsFromSupabase()
                 bindDashboardActionHooks();
             }
         }
@@ -802,6 +803,7 @@ async function syncDashboardUserSession() {
             // Parallel loading of cloud scans and operational tasks
             await fetchUserScansFromSupabase();
             await fetchUserTasksFromSupabase();
+            await fetchUserCropsFromSupabase();
 
         } else {
             console.warn("Unauthenticated session instance. Redirecting to sign-in...");
@@ -1130,6 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener('load', () => {
     syncDashboardUserSession();
+
 
     const menuBtn = $('#menuBtn');
     if (menuBtn) menuBtn.onclick = () => $('#sidebar')?.classList.toggle('open');
