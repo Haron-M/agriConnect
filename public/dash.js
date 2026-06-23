@@ -701,7 +701,13 @@ document.getElementById('btnHistory')?.addEventListener('click', () => {
 
 // Ensure your Supabase client initialization is accessible globally or within this scope
 // const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
+document.getElementById('btnMainpest').addEventListener('click', () => {
+    loadPage(pestLibrary.html);
+})
 
+document.getElementById('btnMaindisease').addEventListener('click', () => {
+    loadPage(pestLibrary.html);
+})
 async function loadPage(page) {
     try {
         const response = await fetch(page);
