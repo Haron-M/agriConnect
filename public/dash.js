@@ -761,8 +761,9 @@ async function initializeDynamicPestLibrary() {
 
     // 2. Render HTML Cards dynamically based on schema columns
     function renderCards(items) {
-        f(!pestsGrid) return;
+        if (!pestsGrid) return;
         pestsGrid.innerHTML = ""; // Wipe container clear
+
 
         // ✅ ADD THIS CHECK: Give visual feedback when table has 0 rows
         if (!items || items.length === 0) {
