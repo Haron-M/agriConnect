@@ -727,17 +727,21 @@ async function loadPage(page) {
         console.error("Failed to dynamically load partial workspace container view:", err);
     }
 }
-
-// Updated scoped function querying your Dashboard Backend Endpoint Directly
+// Updated scoped function querying your Dashboard Backend Server cleanly across ports
 async function initializeDynamicPestLibrary() {
     const pestsGrid = document.getElementById("pests-grid");
     const searchInput = document.getElementById("library-search");
 
     let allScannedItems = []; // Keeps an in-memory array of data records
 
-    // ✅ NEW SECURE WAY: Hit your dashboard server's endpoint
+    // 🌐 BRIDGE THE LOCAL HOST PORT MISMATCH (Port 5500 vs Port 3000)
+    // If running on local live-server (usually port 5500 or 127.0.0.1), route explicitly to the node server backend on port 3000.
+    const targetApiUrl = (window.location.port && window.location.port !== "3000")
+        ? "http://localhost:3000/api/library-items"
+        : "/api/library-items";
+
     try {
-        const response = await fetch('/api/library-items');
+        const response = await fetch(targetApiUrl);
 
         if (!response.ok) {
             throw new Error(`Server returned a bad status code: ${response.status}`);
@@ -805,7 +809,6 @@ async function initializeDynamicPestLibrary() {
 
     // 3. Real-time Search Event Listener (Filters rows instantly)
     if (searchInput) {
-        // Wipe old listeners by cloning the node if needed, or simply append cleanly
         searchInput.oninput = (e) => {
             const query = e.target.value.toLowerCase().trim();
 
@@ -822,8 +825,7 @@ async function initializeDynamicPestLibrary() {
     }
 }
 
-// Initial fire on document load
-document.addEventListener("DOMContentLoaded", initializeDynamicPestLibrary);
+// ❌ REMOVED DOMContentLoaded LISTENER: Handled completely by your custom loadPage container hook instead!
 
 // Cross-window sync trigger for when scanner view changes update the layout state
 window.addEventListener("message", (event) => {
