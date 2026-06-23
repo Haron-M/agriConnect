@@ -9,16 +9,11 @@
         :root {
             --primary-green: #2e6f40;
             /* Matching your sidebar green theme */
+            --primary-green-rgb: 46, 111, 64;
+            /* RGB values for clean box shadow opacity layers */
             --text-dark: #333;
             --text-light: #666;
             --bg-light: #f9f9f9;
-            --border-color: #e0e0e0;
-        }
-
-        :root {
-            --primary-green: #2e6f40;
-            --text-dark: #333;
-            --text-light: #666;
             --border-color: #e0e0e0;
         }
 
@@ -40,15 +35,16 @@
             margin-bottom: 24px;
         }
 
-        /* Search Bar Styling */
-        /* Search Bar Container Styling */
+        /* ==========================================================================
+   Search Bar Styling (Centered Pill-Shape Profile)
+   ========================================================================== */
         .search-filter-wrapper {
             margin-bottom: 35px;
             width: 100%;
             display: flex;
-            /* Enables layout alignment */
+            /* Enables flexible wrapper alignment engine */
             justify-content: center;
-            /* Centers the search input horizontally */
+            /* Centers the search bar input horizontally */
             align-items: center;
         }
 
@@ -59,9 +55,9 @@
             padding: 12px 24px;
             /* Roomier internal padding for a premium look */
             font-size: 15px;
-            color: var(--text-main, #333);
+            color: var(--text-dark);
             background-color: #ffffff;
-            border: 2px solid var(--border-color, #e0e0e0);
+            border: 2px solid var(--border-color);
             border-radius: 50px;
             /* Smooth, pill-shaped design */
             outline: none;
@@ -70,10 +66,10 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Dynamic Interactive States */
+        /* Dynamic Interactive Focus States */
         #library-search:focus {
             border-color: var(--primary-green);
-            box-shadow: 0 4px 20px rgba(var(--primary-green-rgb, 76, 175, 80), 0.15);
+            box-shadow: 0 4px 20px rgba(var(--primary-green-rgb), 0.15);
             transform: translateY(-1px);
             /* Subtle elevate animation on interaction */
         }
@@ -83,14 +79,16 @@
             font-size: 14px;
         }
 
-        /* Pests Layout Grid */
+        /* ==========================================================================
+   Pests Grid & Card Layout Base Styles
+   ========================================================================== */
         .pests-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
         }
 
-        /* Individual Dynamic Card */
+        /* Individual Dynamic Card Container */
         .pest-card {
             background: #fff;
             border-radius: 12px;
@@ -99,11 +97,12 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, opacity 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .pest-card:hover {
             transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         .pest-image {
@@ -156,16 +155,42 @@
         }
 
         .info-section h4 {
-            margin: 0 0 4px 0;
+            margin: 0 0 6px 0;
             font-size: 14px;
             color: var(--text-dark);
         }
 
-        .info-section p {
+        /* ==========================================================================
+   Dynamic List Formatter Overrides (Resolves Alignment Variance)
+   ========================================================================== */
+        .info-content p {
             margin: 0;
             font-size: 14px;
             color: var(--text-light);
             line-height: 1.45;
+        }
+
+        .formatted-diagnostic-list {
+            margin: 4px 0 0 0;
+            padding-left: 18px;
+            /* Indents markers cleanly down the left axis boundary */
+            list-style-type: disc;
+            /* Clean circular formatting layout bullet elements */
+        }
+
+        .formatted-diagnostic-list li {
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            /* Balanced structural text spacing gaps */
+            text-align: left;
+            /* Forces clean left-alignment for long strings */
+        }
+
+        /* Custom Marker Styling matching theme color signatures */
+        .formatted-diagnostic-list li::marker {
+            color: var(--primary-green);
         }
 
         /* Feedback Messages */

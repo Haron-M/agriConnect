@@ -776,39 +776,53 @@ async function initializeDynamicPestLibrary() {
         }
 
         items.forEach(item => {
-            // Mapping schema properties cleanly with explicit fallbacks
+            // 🛠️ Inside your items.forEach(item => { ... }) loop:
+
             const crop = item.crop_targeted || "Unknown Crop";
             const name = item.disease_name || "Identified Pathology";
-            const symptoms = item.observed_symptoms || "No diagnostic notes available.";
-            const controls = item.recommended_controls || "No counteraction remediation guidelines found.";
+            const symptomsRaw = item.observed_symptoms || "No diagnostic notes available.";
+            const controlsRaw = item.recommended_controls || "No counteraction remediation guidelines found.";
+            const image = (item.image_url && item.image_url !== "EMPTY") ? item.image_url : "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500";
 
-            // Catch both null paths and your old "EMPTY" placeholders safely
-            const image = (item.image_url && item.image_url !== "EMPTY")
-                ? item.image_url
-                : "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500";
+            // Function to split raw text by common symbols (•) and clean up spaces
+            const formatToHTMLList = (rawText) => {
+                if (!rawText.includes('•')) return `<p>${rawText}</p>`;
+
+                const items = rawText
+                    .split('•')
+                    .map(str => str.trim())
+                    .filter(str => str.length > 0); // Drop empty splits
+
+                return `<ul class="formatted-diagnostic-list">
+        ${items.map(bullet => `<li>${bullet}</li>`).join('')}
+    </ul>`;
+            };
+
+            const symptomsHTML = formatToHTMLList(symptomsRaw);
+            const controlsHTML = formatToHTMLList(controlsRaw);
 
             const cardHTML = `
-                <div class="pest-card" data-crop="${crop.toLowerCase()}" data-name="${name.toLowerCase()}">
-                    <div class="pest-image">
-                        <img src="${image}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500'">
-                        <span class="crop-badge">${crop}</span>
-                    </div>
-                    <div class="pest-info">
-                        <h3>${name}</h3>
-                        <p class="scientific-name">${item.scientific_name || ''}</p>
-                        
-                        <div class="info-section">
-                            <h4>⚠️ Symptoms / Damage:</h4>
-                            <p>${symptoms}</p>
-                        </div>
-                        
-                        <div class="info-section">
-                            <h4>🛡️ Control Measures:</h4>
-                            <p>${controls}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+    <div class="pest-card" data-crop="${crop.toLowerCase()}" data-name="${name.toLowerCase()}">
+        <div class="pest-image">
+            <img src="${image}" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?w=500'">
+            <span class="crop-badge">${crop}</span>
+        </div>
+        <div class="pest-info">
+            <h3>${name}</h3>
+            <p class="scientific-name">${item.scientific_name || ''}</p>
+            
+            <div class="info-section">
+                <h4>⚠️ Symptoms / Damage:</h4>
+                <div class="info-content">${symptomsHTML}</div>
+            </div>
+            
+            <div class="info-section">
+                <h4>🛡️ Control Measures:</h4>
+                <div class="info-content">${controlsHTML}</div>
+            </div>
+        </div>
+    </div>
+`;
             pestsGrid.insertAdjacentHTML("beforeend", cardHTML);
         });
     }
