@@ -761,11 +761,16 @@ async function initializeDynamicPestLibrary() {
 
     // 2. Render HTML Cards dynamically based on schema columns
     function renderCards(items) {
-        if (!pestsGrid) return;
+        f(!pestsGrid) return;
         pestsGrid.innerHTML = ""; // Wipe container clear
 
-        if (items.length === 0) {
-            pestsGrid.innerHTML = `<div class="no-results">No matches or scanned history logs found.</div>`;
+        // ✅ ADD THIS CHECK: Give visual feedback when table has 0 rows
+        if (!items || items.length === 0) {
+            pestsGrid.innerHTML = `
+            <div class="no-results" style="text-align: center; padding: 40px; color: #888;">
+                <p style="font-size: 1.2rem; margin-bottom: 8px;">🌱 Your Pest Library is Empty</p>
+                <p style="font-size: 0.9rem;">Run a new scan inside the Disease Scanner panel to generate records!</p>
+            </div>`;
             return;
         }
 
