@@ -23,13 +23,16 @@
         }
 
         .pest-library-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 50px;
             padding: 24px;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
         .library-header h2 {
             color: var(--primary-green);
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .library-header p {
@@ -38,23 +41,46 @@
         }
 
         /* Search Bar Styling */
+        /* Search Bar Container Styling */
         .search-filter-wrapper {
-            margin-bottom: 30px;
-            max-width: 600px;
+            margin-bottom: 35px;
+            width: 100%;
+            display: flex;
+            /* Enables layout alignment */
+            justify-content: center;
+            /* Centers the search input horizontally */
+            align-items: center;
         }
 
         #library-search {
             width: 100%;
-            padding: 14px 20px;
-            font-size: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 30px;
+            max-width: 500px;
+            /* Sleek width profile */
+            padding: 12px 24px;
+            /* Roomier internal padding for a premium look */
+            font-size: 15px;
+            color: var(--text-main, #333);
+            background-color: #ffffff;
+            border: 2px solid var(--border-color, #e0e0e0);
+            border-radius: 50px;
+            /* Smooth, pill-shaped design */
             outline: none;
-            transition: border-color 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            /* Soft background depth shadow */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Dynamic Interactive States */
         #library-search:focus {
             border-color: var(--primary-green);
+            box-shadow: 0 4px 20px rgba(var(--primary-green-rgb, 76, 175, 80), 0.15);
+            transform: translateY(-1px);
+            /* Subtle elevate animation on interaction */
+        }
+
+        #library-search::placeholder {
+            color: #aaa;
+            font-size: 14px;
         }
 
         /* Pests Layout Grid */
