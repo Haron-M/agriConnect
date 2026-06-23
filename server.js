@@ -24,25 +24,28 @@ const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_fjGcSPF1IQ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Check this inside your backend server.js file:
 app.get("/api/library-items", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("disease_scans")
-            .select("*")
+            .select("*") // 💥 Ensure you select everything!
             .order("created_at", { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Supabase query error details:", error);
+            return res.status(500).json({ error: error.message });
+        }
 
-        // Return the clean row dataset to populate your page cards
-        return res.json(data);
+        // 🚀 CRITICAL: Log this to your terminal to see if rows actually exist online
+        console.log(`Fetched ${data ? data.length : 0} rows from disease_scans table successfully.`);
+
+        return res.json(data || []);
     } catch (err) {
-        console.error("Error pulling library elements from database:", err);
-        return res.status(500).json({ error: "Failed fetching stored diagnoses from the database layer." });
+        console.error("Backend caught execution error:", err);
+        return res.status(500).json({ error: "Internal server error fetching items." });
     }
 });
-/**
- * Endpoint to securely proxy and stream chat completions from NVIDIA NIM to the browser
- */
 app.post('/api/agribot/chat', async (req, res) => {
     try {
         // 1. Destructure chatHistory instead of message!
