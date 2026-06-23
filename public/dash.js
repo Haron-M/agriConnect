@@ -1202,7 +1202,7 @@ async function handleUserMessageSend() {
         spinnerRow.remove();
         const errorBubble = appendChatMessageElement('', 'bot');
         const errorTarget = errorBubble?.querySelector('.bot-text-content');
-        if (errorTarget) errorTarget.innerText = "⚠️ Connection to Node.js backend failed. Please verify server status.";
+        if (errorTarget) errorTarget.innerText = "⚠️ Connection failed!. please ensure you have stable internet connection";
     }
 
     scrollChatToBottom();
