@@ -213,7 +213,7 @@ header {
 .alert-body {
     font-size: 13px;
     color: var(--text-muted);
-    margin-top: 5px;
+   
     line-height: 1.5;
 }
 
