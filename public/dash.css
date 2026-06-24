@@ -404,12 +404,12 @@ a {
     font-weight: 600;
     font-size: 14px;
     color: #f1f5f9;
-    background: rgba(15, 23, 42, 0.4);
+    
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom:-10px;
+    
 }
 
 /* Informative Panel Body */
