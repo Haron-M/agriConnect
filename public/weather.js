@@ -176,26 +176,27 @@ function renderNaturalLanguageBanners() {
     // ==========================================================================
     if (rainStartIndex !== -1) {
         // === STATE 1: RAIN PREDICTED ===
-        const startTimeStr = weatherDataSet.timeline[rainStartIndex];
-        const startDate = new Date(startTimeStr);
-        const startHour = startDate.getHours();
-        const durationHours = Math.max(3, (rainEndIndex - rainStartIndex) * 3);
+      // === STATE 1: RAIN PREDICTED ===
+const startTimeStr = weatherDataSet.timeline[rainStartIndex];
+const startDate = new Date(startTimeStr);
+const startHour = startDate.getHours();
 
-        let timePeriod = "tonight";
-        if (startHour < 12) timePeriod = "this morning";
-        else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
+// Calculate total hours based on intervals found (each step is 3 hours)
+const durationHours = Math.max(3, (rainEndIndex - rainStartIndex) * 3);
 
-        const format12h = (dateObj) => {
-            return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        };
+let timePeriod = "tonight";
+if (startHour < 12) timePeriod = "this morning";
+else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
 
-        const displayStartTime = format12h(startDate);
-        const endDate = new Date(weatherDataSet.timeline[Math.min(rainEndIndex - 1, weatherDataSet.timeline.length - 1)]);
+const format12h = (dateObj) => {
+    return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+};
 
-        if (rainEndIndex >= weatherDataSet.timeline.length || rainEndIndex === rainStartIndex) {
-            endDate.setTime(startDate.getTime() + (durationHours * 60 * 60 * 1000));
-        }
-        const displayEndTime = format12h(endDate);
+const displayStartTime = format12h(startDate);
+
+// 🔥 FIX: Calculate the end date by adding the duration directly to the start date
+const endDate = new Date(startDate.getTime() + (durationHours * 60 * 60 * 1000));
+const displayEndTime = format12h(endDate);
 
         // Update the main dashboard text banner if nodes are available
         if (titleNode) titleNode.innerText = `Rain expected ${timePeriod}`;
@@ -209,7 +210,7 @@ function renderNaturalLanguageBanners() {
                     🌧️ Rain Imminent
                 </div>
                 <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
-                    Showers are projected <strong>${timePeriod}</strong> starting around <strong>${displayStartTime}</strong> until <strong>${displayEndTime}</strong>.
+                    Showers are projected <strong>${timePeriod}</strong> between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.
                 </div>
                 <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; font-style: italic;">
                     Farming window impact: ~${durationHours} hrs duration.
