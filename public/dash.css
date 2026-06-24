@@ -370,6 +370,40 @@ a {
     border-radius: 50%;
     box-shadow: 0 0 0 2px #fff
 }
+.notification-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    width: 280px;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 1000;
+    font-family: sans-serif;
+}
+.panel-header {
+    padding: 10px 14px;
+    font-weight: bold;
+    border-bottom: 1px solid #333;
+    color: #fff;
+    font-size: 14px;
+}
+.panel-body {
+    padding: 14px;
+    color: #ccc;
+    font-size: 13px;
+    line-height: 1.4;
+}
+/* Pulse animation for the notification badge */
+.dot.pulse {
+    animation: shadow-pulse 1.5s infinite;
+}
+@keyframes shadow-pulse {
+    0% { box-shadow: 0 0 0 0px rgba(255, 75, 75, 0.7); }
+    100% { box-shadow: 0 0 0 6px rgba(255, 75, 75, 0); }
+}
 
 .weather-chip {
     display: flex;

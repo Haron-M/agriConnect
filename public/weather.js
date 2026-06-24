@@ -133,6 +133,9 @@ function startSystemClockLoop() {
     run();
     setInterval(run, 60000);
 }
+// Add these global placeholder variables at the top of your script
+let rainAlertMessage = "Clear skies projected for the next 24 hours.";
+let isRainExpectedActive = false;
 
 function renderNaturalLanguageBanners() {
     const container = document.getElementById('nlp-alert-box');
@@ -143,7 +146,6 @@ function renderNaturalLanguageBanners() {
 
     let rainStartIndex = -1;
     let rainEndIndex = -1;
-
     const lookaheadSteps = Math.min(8, weatherDataSet.pop.length);
 
     for (let i = 0; i < lookaheadSteps; i++) {
@@ -161,8 +163,11 @@ function renderNaturalLanguageBanners() {
         rainEndIndex = lookaheadSteps;
     }
 
-    // Unhide the container wrapper so it can display both states seamlessly
     container.style.display = "block";
+
+    // References to your new navbar notification items
+    const bellBadge = document.getElementById('notification-badge');
+    const panelContent = document.getElementById('notification-panel-content');
 
     if (rainStartIndex !== -1) {
         // === STATE 1: RAIN PREDICTED ===
@@ -189,10 +194,34 @@ function renderNaturalLanguageBanners() {
 
         titleNode.innerText = `Rain expected ${timePeriod}`;
         bodyNode.innerText = `Intermittent showers are possible between ${displayStartTime} and ${displayEndTime} (a ${durationHours}-hour window).`;
+        
+        // 🔔 UPDATE NOTIFICATION ARCHITECTURE
+        isRainExpectedActive = true;
+        rainAlertMessage = `⚠️ <strong>Rain Alert:</strong> Showers expected ${timePeriod} between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.`;
+        
+        if (bellBadge) {
+            bellBadge.style.display = "block";
+            bellBadge.classList.add("pulse"); // Triggers the dynamic CSS pulse ring
+        }
+
     } else {
         // === STATE 2: NO RAIN PREDICTED ===
         titleNode.innerText = "No rain expected today";
         bodyNode.innerText = "Clear skies or stable conditions are projected for the next 24 hours. Enjoy your day!";
+        
+        // 🔔 SYSTEM RESET CLEAR STATE
+        isRainExpectedActive = false;
+        rainAlertMessage = "☀️ Stable weather conditions window. No rain expected within the next 24 hours.";
+        
+        if (bellBadge) {
+            bellBadge.style.display = "none";
+            bellBadge.classList.remove("pulse");
+        }
+    }
+
+    // Assign the built text message inside the panel element safely
+    if (panelContent) {
+        panelContent.innerHTML = rainAlertMessage;
     }
 }
 function syncSidebarDisplayMetrics(index) {
@@ -595,7 +624,35 @@ function buildWeeklyStripDeck() {
 
 // Fire the initialize loop
 bootstrapPipeline();
+// Notification Bell Dropdown Panel Toggle Mechanics
+document.addEventListener('DOMContentLoaded', () => {
+    const bellBtn = document.getElementById('notification-bell-btn');
+    const dropPanel = document.getElementById('notification-drop-panel');
+    const bellBadge = document.getElementById('notification-badge');
 
+    if (bellBtn && dropPanel) {
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stops event bubbles so window listener doesn't instantly close it
+            
+            const isHidden = dropPanel.style.display === 'none';
+            dropPanel.style.display = isHidden ? 'block' : 'none';
+
+            // Optional: Remove the pulsing alert badge once the user has acknowledged the warning panel click
+            if (isHidden && bellBadge) {
+                bellBadge.classList.remove('pulse');
+            }
+        });
+    }
+
+    // Close open panel context if user clicks anywhere outside on the screen background
+    window.addEventListener('click', (e) => {
+        if (dropPanel && dropPanel.style.display === 'block') {
+            if (!dropPanel.contains(e.target) && !bellBtn.contains(e.target)) {
+                dropPanel.style.display = 'none';
+            }
+        }
+    });
+});
 window.addEventListener('resize', () => {
     if (weatherDataSet) {
         animateMultiAxisLineGraph();
