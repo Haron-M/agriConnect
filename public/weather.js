@@ -177,26 +177,31 @@ function renderNaturalLanguageBanners() {
     if (rainStartIndex !== -1) {
         // === STATE 1: RAIN PREDICTED ===
       // === STATE 1: RAIN PREDICTED ===
+co// === STATE 1: RAIN PREDICTED ===
 const startTimeStr = weatherDataSet.timeline[rainStartIndex];
 const startDate = new Date(startTimeStr);
 const startHour = startDate.getHours();
-
-// Calculate total hours based on intervals found (each step is 3 hours)
 const durationHours = Math.max(3, (rainEndIndex - rainStartIndex) * 3);
 
-let timePeriod = "tonight";
-if (startHour < 12) timePeriod = "this morning";
-else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
+// 🔥 FIX 1: Dynamic time period classification based on window size
+let timePeriod = "";
+if (durationHours > 6) {
+    timePeriod = "today into tonight"; 
+} else {
+    if (startHour < 12) timePeriod = "this morning";
+    else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
+    else timePeriod = "tonight";
+}
 
+// 🔥 FIX 2: Explicit format settings to avoid 12-hour rollover confusion
 const format12h = (dateObj) => {
     return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 };
 
 const displayStartTime = format12h(startDate);
-
-// 🔥 FIX: Calculate the end date by adding the duration directly to the start date
 const endDate = new Date(startDate.getTime() + (durationHours * 60 * 60 * 1000));
 const displayEndTime = format12h(endDate);
+
 
         // Update the main dashboard text banner if nodes are available
         if (titleNode) titleNode.innerText = `Rain expected ${timePeriod}`;
@@ -210,7 +215,7 @@ const displayEndTime = format12h(endDate);
                     🌧️ Rain Imminent
                 </div>
                 <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
-                    Showers are projected <strong>${timePeriod}</strong> between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.
+                    intermittent Showers are possible <strong>${timePeriod}</strong> between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.
                 </div>
                 <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; font-style: italic;">
                     Farming window impact: ~${durationHours} hrs duration.
