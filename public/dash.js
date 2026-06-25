@@ -213,7 +213,9 @@ function loadActivitiesPage() {
                             <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; background: #f1f5f9; color: #475569; padding: 1px 5px; border-radius: 4px; font-weight: 600;">${t.type}</span>
                             <h4 style="margin: 6px 0 2px 0; font-size: 0.9rem; color: #0f172a; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.title}</h4>
                             <p style="margin: 0 0 6px 0; font-size: 0.8rem; color: #64748b; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${t.description || "No description."}</p>
-                            <span style="font-size: 0.75rem; color: #137333; font-weight: 500;">📅 Due: ${t.dueDate}</span>
+                           <span style="font-size: 0.75rem; color: #137333; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+    📅 Due: ${t.dueDate} at ${t.dueTime ? formatTime12hString(t.dueTime) : 'N/A'}
+</span>
                         </div>
                         <button class="delete-task-btn" data-id="${t.id}" style="position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #ef4444; font-size: 1.1rem; cursor: pointer; padding: 2px 6px; font-weight: bold; line-height: 1;" title="Delete or Postpone Task">
                             ✕
@@ -267,6 +269,10 @@ function loadActivitiesPage() {
                             <label style="display: block; font-size: 0.78rem; color: #334155; font-weight: 600; margin-bottom: 4px;">Scheduled date</label>
                             <input type="date" id="taskInputDate" required style="width: 100%; height: 36px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0 10px; font-size: 0.85rem; outline: none; box-sizing: border-box; background: #ffffff;">
                         </div>
+                        <div style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 0.78rem; color: #334155; font-weight: 600; margin-bottom: 4px;">Scheduled time</label>
+    <input type="time" id="taskInputTime" required style="width: 100%; height: 36px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0 10px; font-size: 0.85rem; outline: none; box-sizing: border-box; background: #ffffff;">
+</div>
                         <button type="submit" style="width: 100%; height: 36px; background: #22c55e; color: #ffffff; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s ease;">Save</button>
                     </form>
                 </div>
@@ -275,6 +281,14 @@ function loadActivitiesPage() {
     `;
 
     setupActivitiesEventHandlers();
+}
+function formatTime12hString(timeStr) {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const displayHour = h % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
 }
 
 function setupActivitiesEventHandlers() {
@@ -295,7 +309,7 @@ function setupActivitiesEventHandlers() {
         const taskTitle = document.getElementById('taskInputTitle').value;
         const taskDesc = document.getElementById('taskInputDesc').value;
         const taskDate = document.getElementById('taskInputDate').value;
-
+        const taskTime = document.getElementById('taskInputTime').value;
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
@@ -308,6 +322,7 @@ function setupActivitiesEventHandlers() {
                     title: taskTitle,
                     description: taskDesc,
                     scheduled_date: taskDate
+                    scheduled_time: taskTime
                 }]);
 
             if (error) throw error;
@@ -385,7 +400,7 @@ async function fetchUserTasksFromSupabase() {
             .filter(item => {
                 const taskDate = new Date(item.scheduled_date);
                 taskDate.setHours(0, 0, 0, 0);
-                return taskDate > today;
+                return taskDate >= today;
             })
             .map(item => ({
                 id: item.id,
@@ -393,6 +408,8 @@ async function fetchUserTasksFromSupabase() {
                 title: item.title,
                 description: item.description,
                 dueDate: new Date(item.scheduled_date).toLocaleDateString('en-US')
+                rawDate: item.scheduled_date, // Keep yyyy-mm-dd clean
+                dueTime: item.scheduled_time
             }));
 
         // 3. Update parent dashboard numbers
@@ -414,35 +431,56 @@ async function fetchUserTasksFromSupabase() {
 }
 
 function getPendingTaskAlerts() {
-    // Safety check if FarmState or the tasks array isn't populated yet
     if (typeof FarmState === 'undefined' || !FarmState.tasksList || !FarmState.tasksList.length) {
         return '';
     }
 
-    // Set up clear date boundaries for 'today' and 'tomorrow' at midnight
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
 
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+    const todayStr = now.toISOString().split('T')[0];
+    const tomorrowDateObj = new Date();
+    tomorrowDateObj.setDate(now.getDate() + 1);
+    const tomorrowStr = tomorrowDateObj.toISOString().split('T')[0];
 
     let taskCardsHtml = '';
 
     FarmState.tasksList.forEach(task => {
-        // Parse the task's due date string back into a comparable Date object
-        const taskDueDate = new Date(task.dueDate);
-        taskDueDate.setHours(0, 0, 0, 0);
+        if (!task.rawDate) return;
 
-        // If the task date matches tomorrow's date stamp exactly
-        if (taskDueDate.getTime() === tomorrow.getTime()) {
+        // Combine task date and time to check if it has passed
+        const taskDueTimestamp = new Date(`${task.rawDate}T${task.dueTime || '00:00'}`);
+
+        // If the task time has already elapsed right now, skip rendering it entirely!
+        if (now.getTime() > taskDueTimestamp.getTime()) {
+            return;
+        }
+
+        const formattedTime = task.dueTime ? formatTime12hString(task.dueTime) : '';
+
+        // Scenario A: Task is scheduled for TOMORROW
+        if (task.rawDate === tomorrowStr) {
             taskCardsHtml += `
                 <div class="alert-card-task" style="margin-top: 8px;">
                     <div style="font-weight: 600; color: #fbbf24; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                         ⏳ Task Due Tomorrow
                     </div>
                     <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
-                        <strong>${task.title}</strong> is scheduled for tomorrow. Plan your field time accordingly!
+                        <strong>${task.title}</strong> is scheduled for tomorrow at <strong>${formattedTime}</strong>. Plan your field time accordingly!
+                    </div>
+                    ${task.description ? `<div style="margin-top: 4px; font-size: 12px; color: #94a3b8;">${task.description}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Scenario B: Task is scheduled for TODAY (and hasn't expired yet)
+        else if (task.rawDate === todayStr) {
+            taskCardsHtml += `
+                <div class="alert-card-task" style="margin-top: 8px; border-left-color: #ef4444; background: rgba(239, 68, 68, 0.08);">
+                    <div style="font-weight: 600; color: #f87171; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        🚨 Task Due Today
+                    </div>
+                    <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
+                        <strong>${task.title}</strong> is due today at <strong>${formattedTime}</strong>.
                     </div>
                     ${task.description ? `<div style="margin-top: 4px; font-size: 12px; color: #94a3b8;">${task.description}</div>` : ''}
                 </div>
