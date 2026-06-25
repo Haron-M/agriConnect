@@ -407,7 +407,7 @@ async function fetchUserTasksFromSupabase() {
                 type: item.task_type,
                 title: item.title,
                 description: item.description,
-                dueDate: new Date(item.scheduled_date).toLocaleDateString('en-US')
+                dueDate: new Date(item.scheduled_date).toLocaleDateString('en-US'),
                 rawDate: item.scheduled_date, // Keep yyyy-mm-dd clean
                 dueTime: item.scheduled_time
             }));
