@@ -15,6 +15,15 @@ const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY; // Keep your secret key safe 
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 // =========================================================
+// 🚀 AFRICA'S TALKING SMS SERVICE SETUP
+// =========================================================
+const africastalking = require('africastalking')({
+    apiKey: process.env.AT_API_KEY || "atsk_94a7715df6cb53bfa9e2fe5d9709d10c7ec5bd9045384b9349a03874c10ab5f30d72b3b9",
+    username: 'sandbox' // Using sandbox environment
+});
+const sms = africastalking.SMS;
+
+// =========================================================
 // 📚 PEST LIBRARY DATA INTEGRATION: FETCH FROM SUPABASE
 // =========================================================
 const { createClient } = require("@supabase/supabase-js");
@@ -46,6 +55,7 @@ app.get("/api/library-items", async (req, res) => {
         return res.status(500).json({ error: "Internal server error fetching items." });
     }
 });
+
 app.post('/api/agribot/chat', async (req, res) => {
     try {
         // 1. Destructure chatHistory instead of message!
@@ -193,6 +203,43 @@ app.get('/api/weather', async (req, res) => {
     } catch (error) {
         console.error("Weather routing crash error:", error);
         return res.status(500).json({ error: "Internal Server Weather Processing Error", details: error.message });
+    }
+});
+
+// =========================================================
+// 📱 NEW ENDPOINT: SEND FARM TASK REMINDER SMS
+// =========================================================
+app.post('/api/send-task-sms', async (req, res) => {
+    try {
+        const { phoneNumber, title, time } = req.body;
+
+        if (!phoneNumber || !title) {
+            return res.status(400).json({ error: "Missing phoneNumber or task title." });
+        }
+
+        // Clean up format time output (e.g., 14:30 -> 2:30 PM)
+        let formattedTime = "N/A";
+        if (time) {
+            const [hours, minutes] = time.split(':');
+            const h = parseInt(hours, 10);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const displayHour = h % 12 || 12;
+            formattedTime = `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        // Outbound configuration payload 
+        const options = {
+            to: [phoneNumber], // Must be in international format like +2547XXXXXXXX
+            message: `🌾 AgriMarket Connect: "${title}" is scheduled for TODAY at ${formattedTime}. Let's keep your field productive!`
+        };
+
+        const result = await sms.send(options);
+        console.log("Africa's Talking Response:", result);
+        return res.json({ success: true, details: result });
+
+    } catch (error) {
+        console.error("Failed to push alert through Africa's Talking engine:", error);
+        return res.status(500).json({ error: "Failed to broadcast task alert SMS." });
     }
 });
 

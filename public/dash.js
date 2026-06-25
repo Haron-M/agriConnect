@@ -302,7 +302,7 @@ function setupActivitiesEventHandlers() {
     document.getElementById('closeTaskModalIcon')?.addEventListener('click', closeModal);
     modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // 2. Existing Form Submission Logic
+    // 2. Updated Form Submission Logic with Africa's Talking SMS Automation
     document.getElementById('farmTaskSubmissionForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const taskType = document.getElementById('taskInputType').value;
@@ -310,10 +310,12 @@ function setupActivitiesEventHandlers() {
         const taskDesc = document.getElementById('taskInputDesc').value;
         const taskDate = document.getElementById('taskInputDate').value;
         const taskTime = document.getElementById('taskInputTime').value;
+
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
+            // Core Supabase Database Record Insertion
             const { error } = await supabaseClient
                 .from('farm_tasks')
                 .insert([{
@@ -326,8 +328,44 @@ function setupActivitiesEventHandlers() {
                 }]);
 
             if (error) throw error;
+
             closeModal();
             toast("✓ Task added successfully");
+
+            // =========================================================
+            // 📱 AFRICA'S TALKING SMS AUTOMATION TRIGGER
+            // =========================================================
+            // Get local date string matching database standard (YYYY-MM-DD)
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            // Only fire if the task is actively scheduled for TODAY
+            if (taskDate === todayStr) {
+                console.log("Scheduling detected for today. Forwarding SMS notification payload...");
+
+                // Fallback testing number for your Africa's Talking Sandbox Simulator
+                const userPhone = session.user.phone || "+254712345678";
+
+                fetch('/api/send-task-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: userPhone,
+                        title: taskTitle,
+                        time: taskTime
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => console.log("SMS Gateway Delivery Status:", data))
+                    .catch(err => console.error("SMS pipeline networking error:", err));
+            }
+            // =========================================================
+
             await fetchUserTasksFromSupabase();
         } catch (err) {
             console.error("Error inserting task:", err);
@@ -335,18 +373,13 @@ function setupActivitiesEventHandlers() {
         }
     });
 
-    // 3. FIX: Handle the red 'X' Cancel/Delete click events explicitly
-    // Ensure your HTML template card has class="delete-task-btn" and data-id="${t.id}"
-    // Handle inline card deletions
+    // 3. Handle the red 'X' Cancel/Delete click events explicitly
     const deleteButtons = document.querySelectorAll('.delete-task-btn');
 
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            // Stop bubble actions
-            e.stopPropagation();
+            e.stopPropagation(); // Stop bubble actions
 
-            // Explicitly pull the data attribute from the button iteration context (btn) 
-            // instead of dynamically reading the event target
             const taskId = btn.getAttribute('data-id');
 
             if (!taskId) {
@@ -369,7 +402,7 @@ function setupActivitiesEventHandlers() {
 
                 toast("✓ Task removed successfully");
 
-                // Re-fetch remaining tasks from the database and refresh the dashboard/UI
+                // Re-fetch remaining tasks from the database and refresh the UI
                 await fetchUserTasksFromSupabase();
 
             } catch (err) {
