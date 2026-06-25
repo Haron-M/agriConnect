@@ -87,6 +87,9 @@ a {
     flex-direction: column;
 }
 
+/* ==========================================================================
+   🌿 SIDEBAR BASE CONFIGURATION (Updated with transitions and overflow fixes)
+   ========================================================================== */
 .sidebar {
     width: var(--sidebar-w);
     position: fixed;
@@ -101,8 +104,76 @@ a {
     gap: 8px;
     box-shadow: 6px 0 30px rgba(20, 83, 45, .12);
     z-index: 45;
-    transition: transform .3s ease;
+    /* 🚀 CHANGED: Transition width instead of transform for an inner collapse effect */
+    transition: width .3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevents text from spilling out during transition */
+    white-space: nowrap;
+    /* Keeps text links inline so they don't break onto two lines */
+}
+
+/* Container to handle button alignment inside padding */
+.sidebar-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================================================
+   🌟 COLLAPSED STATE (Triggers when .collapsed class is toggled via JS)
+   ========================================================================== */
+.sidebar.collapsed {
+    width: 75px;
+    /* Shrunk down width for icons only */
+}
+
+/* Smoothly hide text labels, subheadings, and status chips */
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .nav-section,
+.sidebar.collapsed .profile-text {
+    display: none !important;
+}
+
+/* Re-center elements perfectly when icon-only mode is active */
+.sidebar.collapsed .sidebar-toggle-container {
+    justify-content: center;
+}
+
+.sidebar.collapsed .brand,
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .profile {
+    justify-content: center;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* ==========================================================================
+   💻 MAIN CONTENT ADJUSTMENT 
+   (Ensures your dashboard layout resizes when sidebar shrinks)
+   ========================================================================== */
+.main-content {
+    /* Assuming your layout uses var(--sidebar-w) for margin-left */
+    margin-left: var(--sidebar-w);
+    transition: margin-left .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When sidebar has .collapsed class, pull the main section back to 75px */
+.sidebar.collapsed~.main-content {
+    margin-left: 75px;
 }
 
 .brand {
@@ -370,6 +441,7 @@ a {
     border-radius: 50%;
     box-shadow: 0 0 0 2px #fff
 }
+
 /* Upgraded Notification Container Context */
 .top-actions {
     position: relative;
@@ -384,13 +456,15 @@ a {
     top: calc(100% + 12px);
     right: 0;
     width: 320px;
-    background: rgba(30, 41, 59, 0.95); /* Deep slate with slight transparency */
-    backdrop-filter: blur(8px); /* Modern glass effect */
+    background: rgba(30, 41, 59, 0.95);
+    /* Deep slate with slight transparency */
+    backdrop-filter: blur(8px);
+    /* Modern glass effect */
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 
-                0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4),
+        0 8px 10px -6px rgba(0, 0, 0, 0.4);
     z-index: 1000;
     overflow: hidden;
     transform-origin: top right;
@@ -409,12 +483,12 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
 }
 
 /* Informative Panel Body */
 .panel-body1 {
-    margin-top:-2px;
+    margin-top: -2px;
     padding: 10px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #cbd5e1;
@@ -436,8 +510,10 @@ a {
 }
 
 .alert-card-rain {
-    background: rgba(59, 130, 246, 0.1); /* Subtle transparent blue */
-    border-left: 4px solid #3b82f6; /* Accent blue strip */
+    background: rgba(59, 130, 246, 0.1);
+    /* Subtle transparent blue */
+    border-left: 4px solid #3b82f6;
+    /* Accent blue strip */
     border-radius: 6px;
     padding: 7px;
     color: #e2e8f0;
@@ -450,14 +526,20 @@ a {
     right: 2px;
     width: 8px;
     height: 8px;
-    background-color: #ef4444; /* Clean crimson alert color */
+    background-color: #ef4444;
+    /* Clean crimson alert color */
     border-radius: 50%;
     animation: shadow-pulse 1.8s infinite;
 }
 
 @keyframes shadow-pulse {
-    0% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.7); }
-    100% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    0% {
+        box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.7);
+    }
+
+    100% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
 }
 
 .weather-chip {

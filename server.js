@@ -198,7 +198,7 @@ app.post('/api/send-task-sms', async (req, res) => {
 
     try {
         const messageText = `🌾 AgriMarket Connect: "${title}" is scheduled for TODAY at ${formattedTime || 'now'}. Let's keep your field productive!`;
-        const belioUrl = `https://sandbox.belio.co.ke/message/${process.env.BELIO_SERVICE_ID}`;
+        const belioUrl = `https://api.belio.co.ke/message/${process.env.BELIO_SERVICE_ID}`;
 
         // Fixed payload parameters to perfectly match Belio's exact documentation mapping
         const response = await axios.post(belioUrl, {

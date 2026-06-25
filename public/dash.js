@@ -14,6 +14,23 @@ const toast = (m) => {
         console.log("Toast Notification:", m);
     }
 };
+document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.getElementById("sidebar");
+    const toggleBtn = document.getElementById("sidebar-toggle-btn");
+    const toggleIcon = toggleBtn.querySelector(".toggle-icon");
+
+    toggleBtn.addEventListener("click", () => {
+        // Toggle class layout matching
+        sidebar.classList.toggle("collapsed");
+
+        // Swap out icons matching chevron directions
+        if (sidebar.classList.contains("collapsed")) {
+            toggleIcon.textContent = "»"; // Points right when collapsed (image_3f1caa.png)
+        } else {
+            toggleIcon.textContent = "«"; // Points left when fully expanded (image_3f1cc5.png)
+        }
+    });
+});
 
 /* ==========================================================================
    2. CENTRAL APPLICATION STATE MANAGEMENT (Live Diagnostics Tracking)
