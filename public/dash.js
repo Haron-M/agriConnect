@@ -19,15 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggleBtn = document.getElementById("sidebar-toggle-btn");
     const toggleIcon = toggleBtn.querySelector(".toggle-icon");
 
-    toggleBtn.addEventListener("click", () => {
-        // Toggle class layout matching
+    toggleBtn.addEventListener("click", (e) => {
+        // Prevent hover mechanics from shifting focus during click
+        e.stopPropagation();
+
         sidebar.classList.toggle("collapsed");
 
-        // Swap out icons matching chevron directions
+        // Set matching indicator icon states
         if (sidebar.classList.contains("collapsed")) {
-            toggleIcon.textContent = "»"; // Points right when collapsed (image_3f1caa.png)
+            toggleIcon.textContent = "»"; // Ready to pop out
         } else {
-            toggleIcon.textContent = "«"; // Points left when fully expanded (image_3f1cc5.png)
+            toggleIcon.textContent = "«"; // Locked open wide
         }
     });
 });

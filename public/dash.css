@@ -88,7 +88,7 @@ a {
 }
 
 /* ==========================================================================
-   🌿 SIDEBAR BASE CONFIGURATION (Updated with transitions and overflow fixes)
+   🌿 SIDEBAR MODIFICATIONS (Removes Scrollbar & Enables Dynamic Hover Expansion)
    ========================================================================== */
 .sidebar {
     width: var(--sidebar-w);
@@ -104,47 +104,36 @@ a {
     gap: 8px;
     box-shadow: 6px 0 30px rgba(20, 83, 45, .12);
     z-index: 45;
-    /* 🚀 CHANGED: Transition width instead of transform for an inner collapse effect */
-    transition: width .3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 🚀 Smooth width and box shadow animations */
+    transition: width .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s ease;
     overflow-y: auto;
     overflow-x: hidden;
-    /* Prevents text from spilling out during transition */
     white-space: nowrap;
-    /* Keeps text links inline so they don't break onto two lines */
 }
 
-/* Container to handle button alignment inside padding */
-.sidebar-toggle-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
+/* 🧼 HIDE SCROLLBAR TRACKS (Chrome, Safari, Edge, and Firefox) */
+.sidebar::-webkit-scrollbar {
+    display: none;
+    /* Keeps element scrollable but hides the ugly gray track */
 }
 
-.toggle-btn {
-    background: transparent;
-    border: none;
-    color: inherit;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.sidebar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 /* ==========================================================================
-   🌟 COLLAPSED STATE (Triggers when .collapsed class is toggled via JS)
+   🌟 COLLAPSED STATE (Icon Only Mode)
    ========================================================================== */
 .sidebar.collapsed {
-    /* Set explicit width override */
     width: 75px !important;
     min-width: 75px !important;
-    padding: 22px 10px;
-    /* Slight padding reduction to fit icons */
-    align-items: center;
+    padding: 22px 10px !important;
 }
 
-/* Hide all text descriptions, subheadings, and profiles */
+/* Hide target texts when collapsed */
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section,
@@ -152,27 +141,49 @@ a {
     display: none !important;
 }
 
-/* 🚀 FIX FOR MIXED TEXT: Force child nodes that are not icons to hide */
-.sidebar.collapsed .brand div:not(.brand-logo),
-.sidebar.collapsed .profile .profile-info {
-    display: none !important;
-}
-
-/* Center all active layout items */
 .sidebar.collapsed .brand,
 .sidebar.collapsed .nav-item,
-.sidebar.collapsed .profile {
+.sidebar.collapsed .profile,
+.sidebar.collapsed .sidebar-toggle-container {
     justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     width: 100%;
-    padding: 10px 0 !important;
-    margin: 0 auto;
 }
 
-/* Ensure the toggle container updates positions cleanly */
-.sidebar.collapsed .sidebar-toggle-container {
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 5px;
+/* ==========================================================================
+   ✨ 🚀 THE MAGIC: EXPAND AUTOMATICALLY ON MOUSE HOVER
+   ========================================================================== */
+.sidebar.collapsed:hover {
+    width: var(--sidebar-w) !important;
+    /* Forces the bar back to wide layout width */
+    padding: 22px 16px !important;
+    box-shadow: 10px 0 40px rgba(20, 83, 45, 0.3);
+    /* Adds emphasis shadow drop */
+}
+
+/* Bring hidden elements right back into view instantly on hover */
+.sidebar.collapsed:hover .brand-text,
+.sidebar.collapsed:hover .nav-text,
+.sidebar.collapsed:hover .nav-section,
+.sidebar.collapsed:hover .profile-text {
+    display: block !important;
+}
+
+/* Correct formatting alignments within sub-div containers during hover */
+.sidebar.collapsed:hover .nav-section {
+    display: block !important;
+}
+
+.sidebar.collapsed:hover .brand,
+.sidebar.collapsed:hover .nav-item,
+.sidebar.collapsed:hover .profile {
+    justify-content: flex-start !important;
+    padding-left: 12px !important;
+}
+
+.sidebar.collapsed:hover .sidebar-toggle-container {
+    justify-content: flex-end !important;
 }
 
 /* ==========================================================================
