@@ -136,11 +136,15 @@ a {
    🌟 COLLAPSED STATE (Triggers when .collapsed class is toggled via JS)
    ========================================================================== */
 .sidebar.collapsed {
-    width: 75px;
-    /* Shrunk down width for icons only */
+    /* Set explicit width override */
+    width: 75px !important;
+    min-width: 75px !important;
+    padding: 22px 10px;
+    /* Slight padding reduction to fit icons */
+    align-items: center;
 }
 
-/* Smoothly hide text labels, subheadings, and status chips */
+/* Hide all text descriptions, subheadings, and profiles */
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section,
@@ -148,17 +152,27 @@ a {
     display: none !important;
 }
 
-/* Re-center elements perfectly when icon-only mode is active */
-.sidebar.collapsed .sidebar-toggle-container {
-    justify-content: center;
+/* 🚀 FIX FOR MIXED TEXT: Force child nodes that are not icons to hide */
+.sidebar.collapsed .brand div:not(.brand-logo),
+.sidebar.collapsed .profile .profile-info {
+    display: none !important;
 }
 
+/* Center all active layout items */
 .sidebar.collapsed .brand,
 .sidebar.collapsed .nav-item,
 .sidebar.collapsed .profile {
+    justify-content: center !important;
+    width: 100%;
+    padding: 10px 0 !important;
+    margin: 0 auto;
+}
+
+/* Ensure the toggle container updates positions cleanly */
+.sidebar.collapsed .sidebar-toggle-container {
     justify-content: center;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    width: 100%;
+    margin-bottom: 5px;
 }
 
 /* ==========================================================================
