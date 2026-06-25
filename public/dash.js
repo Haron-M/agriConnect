@@ -321,7 +321,7 @@ function setupActivitiesEventHandlers() {
                     task_type: taskType,
                     title: taskTitle,
                     description: taskDesc,
-                    scheduled_date: taskDate
+                    scheduled_date: taskDate,
                     scheduled_time: taskTime
                 }]);
 
