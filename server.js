@@ -18,8 +18,8 @@ const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 // 🚀 AFRICA'S TALKING SMS SERVICE SETUP
 // =========================================================
 const africastalking = require('africastalking')({
-    apiKey: process.env.AT_API_KEY || "atsk_94a7715df6cb53bfa9e2fe5d9709d10c7ec5bd9045384b9349a03874c10ab5f30d72b3b9",
-    username: 'sandbox' // Using sandbox environment
+    apiKey: process.env.AT_API_KEY || "atsk_56b2dae70fe1c8da66d5cf00b0285e119707704867e83613be83bcbf70b706c4ec0a8c2e",
+    username: 'agriconnectMarket' // Using sandbox environment
 });
 const sms = africastalking.SMS;
 
