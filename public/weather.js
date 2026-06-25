@@ -136,121 +136,122 @@ function startSystemClockLoop() {
 // Add these global placeholder variables at the top of your script
 let rainAlertMessage = "Clear skies projected for the next 24 hours.";
 let isRainExpectedActive = false;
-
-function renderNaturalLanguageBanners() {
-    // 1. Gather all element references upfront
+// Ensure this is globally accessible
+window.renderNaturalLanguageBanners = function () {
     const container = document.getElementById('nlp-alert-box');
     const titleNode = document.getElementById('nlp-alert-title');
     const bodyNode = document.getElementById('nlp-alert-body');
     const bellBadge = document.getElementById('notification-badge');
     const panelContent = document.getElementById('notification-panel-content');
 
-    // 2. Safe check data state before running analytics loop
-    if (!weatherDataSet || !weatherDataSet.timeline.length) return;
-
+    let weatherAlertHtml = '';
+    let hasActiveNotification = false;
     let rainStartIndex = -1;
     let rainEndIndex = -1;
-    const lookaheadSteps = Math.min(8, weatherDataSet.pop.length);
 
-    // 3. Scan the 24-hour window (3-hour steps * 8)
-    for (let i = 0; i < lookaheadSteps; i++) {
-        const hasRain = weatherDataSet.pop[i] >= 40 || weatherDataSet.rainVolume[i] > 0;
-        if (hasRain && rainStartIndex === -1) {
-            rainStartIndex = i;
+    // Only run weather calculations if weatherDataSet is fully loaded
+    if (typeof weatherDataSet !== 'undefined' && weatherDataSet && weatherDataSet.timeline) {
+        const lookaheadSteps = Math.min(8, weatherDataSet.pop.length);
+
+        for (let i = 0; i < lookaheadSteps; i++) {
+            const hasRain = weatherDataSet.pop[i] >= 40 || weatherDataSet.rainVolume[i] > 0;
+            if (hasRain && rainStartIndex === -1) {
+                rainStartIndex = i;
+            }
+            if (!hasRain && rainStartIndex !== -1 && rainEndIndex === -1) {
+                rainEndIndex = i;
+                break;
+            }
         }
-        if (!hasRain && rainStartIndex !== -1 && rainEndIndex === -1) {
-            rainEndIndex = i;
-            break;
+
+        if (rainStartIndex !== -1 && rainEndIndex === -1) {
+            rainEndIndex = lookaheadSteps;
         }
-    }
 
-    if (rainStartIndex !== -1 && rainEndIndex === -1) {
-        rainEndIndex = lookaheadSteps;
-    }
+        if (container) container.style.display = "block";
 
-    // Unhide the alert card component wrapper if it exists on the page
-    if (container) container.style.display = "block";
+        if (rainStartIndex !== -1) {
+            const startTimeStr = weatherDataSet.timeline[rainStartIndex];
+            const startDate = new Date(startTimeStr);
+            const startHour = startDate.getHours();
+            const durationHours = Math.max(3, (rainEndIndex - rainStartIndex) * 3);
 
-    // ==========================================================================
-    // PARSE CHRONOLOGY LOGIC & UPDATE UI SITES
-    // ==========================================================================
-    if (rainStartIndex !== -1) {
-        // === STATE 1: RAIN PREDICTED ===
-        const startTimeStr = weatherDataSet.timeline[rainStartIndex];
-        const startDate = new Date(startTimeStr);
-        const startHour = startDate.getHours();
-        const durationHours = Math.max(3, (rainEndIndex - rainStartIndex) * 3);
+            let timePeriod = "";
+            if (durationHours > 6) {
+                timePeriod = "today into tonight";
+            } else {
+                if (startHour < 12) timePeriod = "this morning";
+                else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
+                else timePeriod = "tonight";
+            }
 
-        // Dynamic time period classification based on window size
-        let timePeriod = "";
-        if (durationHours > 6) {
-            timePeriod = "today into tonight"; 
+            const format12h = (dateObj) => {
+                return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            };
+
+            const displayStartTime = format12h(startDate);
+            const endDate = new Date(startDate.getTime() + (durationHours * 60 * 60 * 1000));
+            const displayEndTime = format12h(endDate);
+
+            if (titleNode) titleNode.innerText = `Rain expected ${timePeriod}`;
+            if (bodyNode) bodyNode.innerText = `Intermittent showers are possible between ${displayStartTime} and ${displayEndTime} (a ${durationHours}-hour window).`;
+
+            weatherAlertHtml = `
+                <div class="alert-card-rain">
+                    <div style="font-weight: 600; color: #60a5fa; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        🌧️ Rain Imminent
+                    </div>
+                    <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
+                        Intermittent showers are projected <strong>${timePeriod}</strong> between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.
+                    </div>
+                    <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; font-style: italic;">
+                        Farming window impact: ~${durationHours} hrs duration.
+                    </div>
+                </div>
+            `;
+            hasActiveNotification = true;
         } else {
-            if (startHour < 12) timePeriod = "this morning";
-            else if (startHour >= 12 && startHour < 18) timePeriod = "this afternoon";
-            else timePeriod = "tonight";
+            if (titleNode) titleNode.innerText = "No rain expected today";
+            if (bodyNode) bodyNode.innerText = "Clear skies or stable conditions are projected for the next 24 hours. Enjoy your day!";
         }
+    }
 
-        // Explicit format settings to avoid 12-hour rollover confusion
-        const format12h = (dateObj) => {
-            return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        };
+    // 2. Fetch the Task alerts using the helper function (must be global or accessible)
+    const taskAlertsHtml = typeof getPendingTaskAlerts === 'function' ? getPendingTaskAlerts() : '';
+    if (taskAlertsHtml) {
+        hasActiveNotification = true;
+    }
 
-        const displayStartTime = format12h(startDate);
-        const endDate = new Date(startDate.getTime() + (durationHours * 60 * 60 * 1000));
-        const displayEndTime = format12h(endDate);
+    // 3. Assemble the final unified output panel
+    let finalPanelContent = '';
+    if (weatherAlertHtml) finalPanelContent += weatherAlertHtml;
+    if (taskAlertsHtml) finalPanelContent += taskAlertsHtml;
 
-        // Update the main dashboard text banner if nodes are available
-        if (titleNode) titleNode.innerText = `Rain expected ${timePeriod}`;
-        if (bodyNode) bodyNode.innerText = `Intermittent showers are possible between ${displayStartTime} and ${displayEndTime} (a ${durationHours}-hour window).`;
-        
-        // 🔔 UPDATE NOTIFICATION INTERFACE (MODERN STYLING)
-        isRainExpectedActive = true;
-        rainAlertMessage = `
-            <div class="alert-card-rain">
-                <div style="font-weight: 600; color: #60a5fa; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                    🌧️ Rain Imminent
-                </div>
-                <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
-                    Intermittent showers are projected <strong>${timePeriod}</strong> between <strong>${displayStartTime}</strong> and <strong>${displayEndTime}</strong>.
-                </div>
-                <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; font-style: italic;">
-                    Farming window impact: ~${durationHours} hrs duration.
-                </div>
-            </div>
-        `;
-        
-        if (bellBadge) {
-            bellBadge.style.display = "block";
-            bellBadge.classList.add("pulse");
-        }
-
-    } else {
-        // === STATE 2: NO RAIN PREDICTED ===
-        if (titleNode) titleNode.innerText = "No rain expected today";
-        if (bodyNode) bodyNode.innerText = "Clear skies or stable conditions are projected for the next 24 hours. Enjoy your day!";
-        
-        // 🔔 SYSTEM RESET CLEAR STATE
-        isRainExpectedActive = false;
-        rainAlertMessage = `
+    if (!hasActiveNotification) {
+        finalPanelContent = `
             <div class="alert-state-empty">
                 <span class="alert-state-icon">☀️</span>
                 <div style="font-weight: 500; color: #f8fafc; margin-bottom: 2px;">All Clear</div>
-                <div style="font-size: 12px; color: #94a3b8;">No rain expected within the next 24 hours. Stable farming windows ahead!</div>
+                <div style="font-size: 12px; color: #94a3b8;">No rain threats or urgent tasks due within the next 24 hours.</div>
             </div>
         `;
-        
-        if (bellBadge) {
+    }
+
+    // 4. Update Badge
+    if (bellBadge) {
+        if (hasActiveNotification) {
+            bellBadge.style.display = "block";
+            bellBadge.classList.add("pulse");
+        } else {
             bellBadge.style.display = "none";
             bellBadge.classList.remove("pulse");
         }
     }
 
-    // Direct, isolated entry injection into panel wrapper content
     if (panelContent) {
-        panelContent.innerHTML = rainAlertMessage;
+        panelContent.innerHTML = finalPanelContent;
     }
-}
+};
 function syncSidebarDisplayMetrics(index) {
     const m = weatherDataSet;
     if (!m) return;
@@ -660,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bellBtn && dropPanel) {
         bellBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Stops event bubbles so window listener doesn't instantly close it
-            
+
             const isHidden = dropPanel.style.display === 'none';
             dropPanel.style.display = isHidden ? 'block' : 'none';
 

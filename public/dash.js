@@ -397,6 +397,7 @@ async function fetchUserTasksFromSupabase() {
 
         // 3. Update parent dashboard numbers
         updateDashboardUI();
+        renderNaturalLanguageBanners();
 
         // 4. FIX: Direct, foolproof check for the active Activities panel view
         // If the "+ New task" button exists on the screen, the user is looking at Activities!
@@ -410,6 +411,46 @@ async function fetchUserTasksFromSupabase() {
     } catch (err) {
         console.error("Error handling or sync retrieval of tasks:", err);
     }
+}
+
+function getPendingTaskAlerts() {
+    // Safety check if FarmState or the tasks array isn't populated yet
+    if (typeof FarmState === 'undefined' || !FarmState.tasksList || !FarmState.tasksList.length) {
+        return '';
+    }
+
+    // Set up clear date boundaries for 'today' and 'tomorrow' at midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    let taskCardsHtml = '';
+
+    FarmState.tasksList.forEach(task => {
+        // Parse the task's due date string back into a comparable Date object
+        const taskDueDate = new Date(task.dueDate);
+        taskDueDate.setHours(0, 0, 0, 0);
+
+        // If the task date matches tomorrow's date stamp exactly
+        if (taskDueDate.getTime() === tomorrow.getTime()) {
+            taskCardsHtml += `
+                <div class="alert-card-task" style="margin-top: 8px;">
+                    <div style="font-weight: 600; color: #fbbf24; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        ⏳ Task Due Tomorrow
+                    </div>
+                    <div style="font-size: 13px; color: #e2e8f0; line-height: 1.4;">
+                        <strong>${task.title}</strong> is scheduled for tomorrow. Plan your field time accordingly!
+                    </div>
+                    ${task.description ? `<div style="margin-top: 4px; font-size: 12px; color: #94a3b8;">${task.description}</div>` : ''}
+                </div>
+            `;
+        }
+    });
+
+    return taskCardsHtml;
 }
 /* ==========================================================================
    4. CROPS / PLANTING CYCLE MODULE 
