@@ -3,25 +3,17 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const axios = require('axios');
 
 // Middleware to parse incoming JSON request bodies safely
 app.use(express.json());
 
-// Serve static frontend files (make sure this points to your directory containing dash.html/dash.js)
+// Serve static frontend files
 app.use(express.static(__dirname + '/public'));
 
 // Secure Server Configurations 
-const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY; // Keep your secret key safe here!
+const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-
-// =========================================================
-// 🚀 AFRICA'S TALKING SMS SERVICE SETUP
-// =========================================================
-const africastalking = require('africastalking')({
-    apiKey: process.env.AT_API_KEY || "atsk_56b2dae70fe1c8da66d5cf00b0285e119707704867e83613be83bcbf70b706c4ec0a8c2e",
-    username: 'agriconnectMarket' // Using sandbox environment
-});
-const sms = africastalking.SMS;
 
 // =========================================================
 // 📚 PEST LIBRARY DATA INTEGRATION: FETCH FROM SUPABASE
@@ -33,12 +25,11 @@ const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_fjGcSPF1IQ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Check this inside your backend server.js file:
 app.get("/api/library-items", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("disease_scans")
-            .select("*") // 💥 Ensure you select everything!
+            .select("*")
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -46,9 +37,7 @@ app.get("/api/library-items", async (req, res) => {
             return res.status(500).json({ error: error.message });
         }
 
-        // 🚀 CRITICAL: Log this to your terminal to see if rows actually exist online
         console.log(`Fetched ${data ? data.length : 0} rows from disease_scans table successfully.`);
-
         return res.json(data || []);
     } catch (err) {
         console.error("Backend caught execution error:", err);
@@ -56,17 +45,17 @@ app.get("/api/library-items", async (req, res) => {
     }
 });
 
+// =========================================================
+// 🤖 AGRIBOT CHAT STREAMING ENDPOINT (NVIDIA LLAMA 3.3)
+// =========================================================
 app.post('/api/agribot/chat', async (req, res) => {
     try {
-        // 1. Destructure chatHistory instead of message!
         const { chatHistory } = req.body;
 
-        // Validation fallback guardrail
         if (!chatHistory || !Array.isArray(chatHistory) || chatHistory.length === 0) {
             return res.status(400).json({ error: "Missing required chatHistory parameter or array is empty." });
         }
 
-        // Configure system rules context natively on your server to match your real website layout
         const systemPrompt = `You are AgriBot, the dedicated expert AI assistant embedded into the AgriMarket Connect (AgriHealth) dashboard system
         
         YOUR DEVELOPER:if user ask you who trained you,you will say Haron Moenga who is a software developer, studied at KIBABII UNIVERSITY.
@@ -104,18 +93,15 @@ Here is the exact structure of the website layout the user is currently interact
 
 Respond in a natural, warm, human-like writing tone with proper punctuation and spacing. Keep explanations short, practical, and highly concise.`;
 
-        // 2. Combine your system instruction string smoothly with your conversation history array
         const messagesPayload = [
             { role: "system", content: systemPrompt },
-            ...chatHistory // This cleanly unpacks all previous turns so the bot has memory context!
+            ...chatHistory
         ];
 
-        // Set up specific Server-Sent Events headers for immediate streaming back to frontend
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        // Outbound transaction package to NVIDIA
         const response = await fetch(NVIDIA_URL, {
             method: 'POST',
             headers: {
@@ -124,10 +110,10 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
             },
             body: JSON.stringify({
                 model: "meta/llama-3.3-70b-instruct",
-                messages: messagesPayload, // Pass the combined array here!
+                messages: messagesPayload,
                 temperature: 0.5,
                 max_tokens: 1024,
-                stream: true // Instructs NVIDIA to stream token-by-token
+                stream: true
             })
         });
 
@@ -136,7 +122,6 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
             return res.end();
         }
 
-        // Connect the server streams: pipe incoming data directly down to the response channel
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
@@ -145,7 +130,6 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
             if (done) break;
 
             const chunk = decoder.decode(value, { stream: true });
-            // Forward the raw chunk instantly to the client's browser
             res.write(chunk);
         }
 
@@ -158,13 +142,13 @@ Respond in a natural, warm, human-like writing tone with proper punctuation and 
     }
 });
 
-// Changed from app.post to app.get to match your frontend weather.js fetch call
+// =========================================================
+// 🌦️ WEATHER SECURE PROXY ROUTE (OPENWEATHER API)
+// =========================================================
 app.get('/api/weather', async (req, res) => {
     try {
-        // 1. Read parameters from req.query (GET requests pass data via URL strings)
         const { lat, lon } = req.query;
 
-        // Fallback or validation step
         if (!lat || !lon) {
             return res.status(400).json({ error: "Missing latitude or longitude query parameters." });
         }
@@ -175,17 +159,14 @@ app.get('/api/weather', async (req, res) => {
             return res.status(500).json({ error: "Server API configuration missing." });
         }
 
-        // Construct backend OpenWeather strings securely
         const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
         const geoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
 
-        // Fire both operations in a fast, parallel pipeline
         const [forecastRes, geoRes] = await Promise.all([
             fetch(forecastUrl),
             fetch(geoUrl)
         ]);
 
-        // Guard against upstream errors cleanly
         if (!forecastRes.ok || !geoRes.ok) {
             console.error(`OpenWeather bad response. Forecast: ${forecastRes.status}, Geo: ${geoRes.status}`);
             return res.status(500).json({ error: "Failed fetching data from OpenWeather upstream channels." });
@@ -194,7 +175,6 @@ app.get('/api/weather', async (req, res) => {
         const forecastData = await forecastRes.json();
         const geoData = await geoRes.json();
 
-        // Send back a clean object containing both items to your frontend weather.js
         return res.json({
             forecast: forecastData,
             geo: geoData
@@ -207,39 +187,48 @@ app.get('/api/weather', async (req, res) => {
 });
 
 // =========================================================
-// 📱 NEW ENDPOINT: SEND FARM TASK REMINDER SMS
+// ✉️ NEW BELIO SMS GATEWAY ROUTE (Bypasses KRA requirements)
 // =========================================================
 app.post('/api/send-task-sms', async (req, res) => {
+    const { phoneNumber, title, formattedTime } = req.body;
+
+    if (!phoneNumber || !title) {
+        return res.status(400).json({ success: false, error: "Missing payload data." });
+    }
+
     try {
-        const { phoneNumber, title, time } = req.body;
+        const messageText = `🌾 AgriMarket Connect: "${title}" is scheduled for TODAY at ${formattedTime || 'now'}. Let's keep your field productive!`;
+        const belioUrl = `https://api.belio.co.ke/message/${process.env.BELIO_SERVICE_ID}`;
 
-        if (!phoneNumber || !title) {
-            return res.status(400).json({ error: "Missing phoneNumber or task title." });
-        }
+        // Fixed payload parameters to perfectly match Belio's exact documentation mapping
+        const response = await axios.post(belioUrl, {
+            type: "SendToEach",
+            messages: [
+                {
+                    phone: phoneNumber, // Expected key name: phone (Format: +254XXXXXXXXX)
+                    text: messageText   // Expected key name: text
+                }
+            ]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.BELIO_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-        // Clean up format time output (e.g., 14:30 -> 2:30 PM)
-        let formattedTime = "N/A";
-        if (time) {
-            const [hours, minutes] = time.split(':');
-            const h = parseInt(hours, 10);
-            const ampm = h >= 12 ? 'PM' : 'AM';
-            const displayHour = h % 12 || 12;
-            formattedTime = `${displayHour}:${minutes} ${ampm}`;
-        }
+        console.log("Belio Gateway Delivery Status:", response.data);
 
-        // Outbound configuration payload 
-        const options = {
-            to: [phoneNumber], // Must be in international format like +2547XXXXXXXX
-            message: `🌾 AgriMarket Connect: "${title}" is scheduled for TODAY at ${formattedTime}. Let's keep your field productive!`
-        };
-
-        const result = await sms.send(options);
-        console.log("Africa's Talking Response:", result);
-        return res.json({ success: true, details: result });
+        return res.status(200).json({
+            success: true,
+            details: response.data
+        });
 
     } catch (error) {
-        console.error("Failed to push alert through Africa's Talking engine:", error);
-        return res.status(500).json({ error: "Failed to broadcast task alert SMS." });
+        console.error("Belio API Error Details:", error.response ? error.response.data : error.message);
+        return res.status(500).json({
+            success: false,
+            error: "Failed routing message through Belio platform."
+        });
     }
 });
 

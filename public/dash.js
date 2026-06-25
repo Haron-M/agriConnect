@@ -347,7 +347,7 @@ function setupActivitiesEventHandlers() {
                 console.log("Scheduling detected for today. Forwarding SMS notification payload...");
 
                 // Fallback testing number for your Africa's Talking Sandbox Simulator
-                const userPhone = session.user.phone || "+254101143939";
+                const userPhone = session.user.phone || "0714829951";
 
                 fetch('/api/send-task-sms', {
                     method: 'POST',
