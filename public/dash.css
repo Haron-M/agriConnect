@@ -88,7 +88,9 @@ a {
 }
 
 /* ==========================================================================
-   🌿 SIDEBAR MODIFICATIONS (Removes Scrollbar & Enables Dynamic Hover Expansion)
+   🌿 SIDEBAR BASE CONFIGURATION
+   ========================================================================/* ==========================================================================
+   🌿 SIDEBAR BASE (Force scrollbars away globally)
    ========================================================================== */
 .sidebar {
     width: var(--sidebar-w);
@@ -104,36 +106,39 @@ a {
     gap: 8px;
     box-shadow: 6px 0 30px rgba(20, 83, 45, .12);
     z-index: 45;
-    /* 🚀 Smooth width and box shadow animations */
     transition: width .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s ease;
-    overflow-y: auto;
-    overflow-x: hidden;
-    white-space: nowrap;
-}
 
-/* 🧼 HIDE SCROLLBAR TRACKS (Chrome, Safari, Edge, and Firefox) */
-.sidebar::-webkit-scrollbar {
-    display: none;
-    /* Keeps element scrollable but hides the ugly gray track */
-}
-
-.sidebar {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
+    /* 🚀 SCROLL CONFIG: Allow scrolling when open, but target everything to hide tracks */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
     /* Firefox */
+    -ms-overflow-style: none !important;
+    /* IE/Edge */
+}
+
+/* 🧼 Ultimate Webkit Override for Chrome/Safari/Brave/New Edge */
+.sidebar::-webkit-scrollbar,
+.sidebar *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
 }
 
 /* ==========================================================================
-   🌟 COLLAPSED STATE (Icon Only Mode)
+   🔒 HARD COLLAPSED STATE (Force zero overflow here to kill the track)
    ========================================================================== */
 .sidebar.collapsed {
     width: 75px !important;
     min-width: 75px !important;
     padding: 22px 10px !important;
+
+    /* 🚀 THE FIX: Completely hide any overflow while shrunken down */
+    overflow: hidden !important;
 }
 
-/* Hide target texts when collapsed */
+/* Hide text when collapsed */
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section,
@@ -141,10 +146,11 @@ a {
     display: none !important;
 }
 
+/* Center items in micro mode */
+.sidebar.collapsed .sidebar-toggle-container,
 .sidebar.collapsed .brand,
 .sidebar.collapsed .nav-item,
-.sidebar.collapsed .profile,
-.sidebar.collapsed .sidebar-toggle-container {
+.sidebar.collapsed .profile {
     justify-content: center !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -152,38 +158,35 @@ a {
 }
 
 /* ==========================================================================
-   ✨ 🚀 THE MAGIC: EXPAND AUTOMATICALLY ON MOUSE HOVER
+   ✨ HOVER STATE (Re-enable scrolling smoothly if content overflows)
    ========================================================================== */
-.sidebar.collapsed:hover {
+.sidebar.collapsed.hover-expanded {
     width: var(--sidebar-w) !important;
-    /* Forces the bar back to wide layout width */
     padding: 22px 16px !important;
     box-shadow: 10px 0 40px rgba(20, 83, 45, 0.3);
-    /* Adds emphasis shadow drop */
+
+    /* 🚀 Re-allow safe inner navigation scrolling once expanded on hover */
+    overflow-y: auto !important;
 }
 
-/* Bring hidden elements right back into view instantly on hover */
-.sidebar.collapsed:hover .brand-text,
-.sidebar.collapsed:hover .nav-text,
-.sidebar.collapsed:hover .nav-section,
-.sidebar.collapsed:hover .profile-text {
+/* Show elements again during transient hover state */
+.sidebar.collapsed.hover-expanded .brand-text,
+.sidebar.collapsed.hover-expanded .nav-text,
+.sidebar.collapsed.hover-expanded .nav-section,
+.sidebar.collapsed.hover-expanded .profile-text {
     display: block !important;
 }
 
-/* Correct formatting alignments within sub-div containers during hover */
-.sidebar.collapsed:hover .nav-section {
-    display: block !important;
+/* Realign structure when expanded via hover */
+.sidebar.collapsed.hover-expanded .sidebar-toggle-container {
+    justify-content: flex-end !important;
 }
 
-.sidebar.collapsed:hover .brand,
-.sidebar.collapsed:hover .nav-item,
-.sidebar.collapsed:hover .profile {
+.sidebar.collapsed.hover-expanded .brand,
+.sidebar.collapsed.hover-expanded .nav-item,
+.sidebar.collapsed.hover-expanded .profile {
     justify-content: flex-start !important;
     padding-left: 12px !important;
-}
-
-.sidebar.collapsed:hover .sidebar-toggle-container {
-    justify-content: flex-end !important;
 }
 
 /* ==========================================================================

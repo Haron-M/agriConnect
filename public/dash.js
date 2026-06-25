@@ -14,26 +14,41 @@ const toast = (m) => {
         console.log("Toast Notification:", m);
     }
 };
+
 document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebar-toggle-btn");
     const toggleIcon = toggleBtn.querySelector(".toggle-icon");
 
+    // 1. Handle Click Toggle
     toggleBtn.addEventListener("click", (e) => {
-        // Prevent hover mechanics from shifting focus during click
-        e.stopPropagation();
+        // Prevent hover mechanics from fighting the button click
+        sidebar.classList.remove("hover-expanded");
 
         sidebar.classList.toggle("collapsed");
 
-        // Set matching indicator icon states
+        // Swap out arrows accurately
         if (sidebar.classList.contains("collapsed")) {
-            toggleIcon.textContent = "»"; // Ready to pop out
+            toggleIcon.textContent = "»"; // Ready to expand
         } else {
             toggleIcon.textContent = "«"; // Locked open wide
         }
     });
-});
 
+    // 2. Handle Mouse Entering Sidebar Area
+    sidebar.addEventListener("mouseenter", () => {
+        // Only expand on hover if it's currently collapsed by choice
+        if (sidebar.classList.contains("collapsed")) {
+            sidebar.classList.add("hover-expanded");
+        }
+    });
+
+    // 3. Handle Mouse Leaving Sidebar Area
+    sidebar.addEventListener("mouseleave", () => {
+        // Pull text back down when the mouse moves out
+        sidebar.classList.remove("hover-expanded");
+    });
+});
 /* ==========================================================================
    2. CENTRAL APPLICATION STATE MANAGEMENT (Live Diagnostics Tracking)
    ========================================================================== */
