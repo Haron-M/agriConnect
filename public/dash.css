@@ -89,8 +89,6 @@ a {
 
 /* ==========================================================================
    🌿 SIDEBAR BASE CONFIGURATION
-   ========================================================================/* ==========================================================================
-   🌿 SIDEBAR BASE (Force scrollbars away globally)
    ========================================================================== */
 .sidebar {
     width: var(--sidebar-w);
@@ -106,18 +104,15 @@ a {
     gap: 8px;
     box-shadow: 6px 0 30px rgba(20, 83, 45, .12);
     z-index: 45;
-    transition: width .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s ease;
+    transition: width .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s ease, padding .3s ease;
 
-    /* 🚀 SCROLL CONFIG: Allow scrolling when open, but target everything to hide tracks */
     overflow-y: auto !important;
     overflow-x: hidden !important;
     scrollbar-width: none !important;
-    /* Firefox */
     -ms-overflow-style: none !important;
-    /* IE/Edge */
 }
 
-/* 🧼 Ultimate Webkit Override for Chrome/Safari/Brave/New Edge */
+/* 🧼 Global Scrollbar Removal Track */
 .sidebar::-webkit-scrollbar,
 .sidebar *::-webkit-scrollbar {
     display: none !important;
@@ -126,19 +121,44 @@ a {
     background: transparent !important;
 }
 
+/* 🧭 Toggle Button Container Alignment */
+.sidebar-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    /* Pushes chevron to the right edge */
+    width: 100%;
+    margin-bottom: -12px;
+    box-sizing: border-box;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 22px;
+    /* 🚀 Fixed uniform text scale matching image_72e387.png */
+    font-weight: bold;
+    cursor: pointer;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    margin-top: -15px;
+}
+
 /* ==========================================================================
-   🔒 HARD COLLAPSED STATE (Force zero overflow here to kill the track)
+   🔒 HARD COLLAPSED STATE (Scrollbar hidden, Icons perfectly aligned)
    ========================================================================== */
 .sidebar.collapsed {
     width: 75px !important;
     min-width: 75px !important;
     padding: 22px 10px !important;
-
-    /* 🚀 THE FIX: Completely hide any overflow while shrunken down */
     overflow: hidden !important;
+    /* 🚀 Keeps scrollbars completely invisible */
 }
 
-/* Hide text when collapsed */
+/* ✂️ Hide text items when collapsed */
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section,
@@ -146,8 +166,22 @@ a {
     display: none !important;
 }
 
-/* Center items in micro mode */
-.sidebar.collapsed .sidebar-toggle-container,
+/* 🎯 FIX: Force toggle container to maintain centering when compressed */
+.sidebar.collapsed .sidebar-toggle-container {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 10px;
+}
+
+/* 🎯 Ensure button size stays clean and crisp */
+.sidebar.collapsed .toggle-btn {
+    font-size: 22px !important;
+    padding: 6px 0 !important;
+    width: 100%;
+}
+
+/* Center matching custom assets */
 .sidebar.collapsed .brand,
 .sidebar.collapsed .nav-item,
 .sidebar.collapsed .profile {
@@ -158,18 +192,16 @@ a {
 }
 
 /* ==========================================================================
-   ✨ HOVER STATE (Re-enable scrolling smoothly if content overflows)
+   ✨ HOVER VARIANT (Smoothly returns to the exact design specifications)
    ========================================================================== */
 .sidebar.collapsed.hover-expanded {
     width: var(--sidebar-w) !important;
     padding: 22px 16px !important;
     box-shadow: 10px 0 40px rgba(20, 83, 45, 0.3);
-
-    /* 🚀 Re-allow safe inner navigation scrolling once expanded on hover */
     overflow-y: auto !important;
 }
 
-/* Show elements again during transient hover state */
+/* Restore component layout visibilities on expansion */
 .sidebar.collapsed.hover-expanded .brand-text,
 .sidebar.collapsed.hover-expanded .nav-text,
 .sidebar.collapsed.hover-expanded .nav-section,
@@ -177,9 +209,15 @@ a {
     display: block !important;
 }
 
-/* Realign structure when expanded via hover */
+/* 🚀 FIX: Push the toggle button right back to the right-hand side on hover */
 .sidebar.collapsed.hover-expanded .sidebar-toggle-container {
     justify-content: flex-end !important;
+    padding-right: 0 !important;
+}
+
+.sidebar.collapsed.hover-expanded .toggle-btn {
+    width: auto !important;
+    padding: 6px 12px !important;
 }
 
 .sidebar.collapsed.hover-expanded .brand,
@@ -190,18 +228,28 @@ a {
 }
 
 /* ==========================================================================
-   💻 MAIN CONTENT ADJUSTMENT 
-   (Ensures your dashboard layout resizes when sidebar shrinks)
+   💻 MAIN CONTAINER LAYOUT ADAPTATION
    ========================================================================== */
-.main-content {
-    /* Assuming your layout uses var(--sidebar-w) for margin-left */
+.main {
+    /* Base spacing when sidebar is fully open */
     margin-left: var(--sidebar-w);
-    transition: margin-left .3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: calc(100% - var(--sidebar-w));
+    box-sizing: border-box;
+
+    /* Smooth fluid layout transition for BOTH clicking and hovering */
+    transition: margin-left .3s cubic-bezier(0.4, 0, 0.2, 1), width .3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* When sidebar has .collapsed class, pull the main section back to 75px */
-.sidebar.collapsed~.main-content {
-    margin-left: 75px;
+/* 🚀 When sidebar is collapsed via button click -> pull content left */
+.sidebar.collapsed~.main {
+    margin-left: 75px !important;
+    width: calc(100% - 75px) !important;
+}
+
+/* 🚀 CHANGE HERE: When you hover over the collapsed sidebar, push the dashboard right! */
+.sidebar.collapsed.hover-expanded~.main {
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
 }
 
 .brand {
@@ -2160,10 +2208,13 @@ a {
         flex-direction: column;
     }
 
+    /* 🌿 UPDATED: Added transition and forced structural resets for mobile layout */
     .sidebar {
-
         position: fixed;
-        width: 260px;
+        width: 260px !important;
+        /* Lock mobile width */
+        min-width: 260px !important;
+        padding: 22px 16px !important;
         left: 0;
         top: var(--header-h);
         bottom: 0;
@@ -2171,17 +2222,62 @@ a {
         z-index: 100;
         overflow-y: auto;
         max-height: calc(100vh - var(--header-h));
+
+        /* 🚀 SMOOTH SLIDE MOTION */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
-    .sidebar.open {
-        transform: translateX(0);
+    /* 🚀 SLIDE ANIMATION TRIGGER (Handles regular open & JS state conflicts smoothly) */
+    .sidebar.open,
+    .sidebar.collapsed.open {
+        transform: translateX(0) !important;
+        box-shadow: 10px 0 40px rgba(10, 45, 20, 0.25) !important;
     }
 
+    /* 🛑 FORCE DESKTOP TOGGLE BUTTON & HOVER STYLES OUT OF MOBILE SCREENS */
+    #sidebar-toggle-btn,
+    .sidebar-toggle-container {
+        display: none !important;
+    }
+
+    .sidebar.collapsed {
+        width: 260px !important;
+        min-width: 260px !important;
+        transform: translateX(-100%) !important;
+        /* Prevent button logic overrides from breaking layout */
+    }
+
+    /* Keep hidden text visible inside mobile drawer view */
+    .sidebar.collapsed .brand-text,
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .nav-section,
+    .sidebar.collapsed .profile-text {
+        display: block !important;
+    }
+
+    .sidebar.collapsed .brand,
+    .sidebar.collapsed .nav-item,
+    .sidebar.collapsed .profile {
+        justify-content: flex-start !important;
+        padding-left: 12px !important;
+        width: auto !important;
+    }
+
+    .sidebar.collapsed.hover-expanded {
+        transform: translateX(-100%) !important;
+        /* Disable laptop hover on tap screens */
+    }
+
+    /* ==========================================================================
+       💻 REMAINING ORIGINAL APP LAYOUT RULES
+       ========================================================================== */
     .main {
-        margin-left: 0;
+        margin-left: 0 !important;
+        width: 100% !important;
         flex: 1;
         margin-top: 34px;
-
+        transition: none !important;
+        /* Prevent dashboard content layout shifts on mobile */
     }
 
     .menu-btn {
@@ -2255,8 +2351,6 @@ a {
         position: absolute;
         right: 10px;
     }
-
-
 }
 
 @media (max-width:480px) {
