@@ -411,6 +411,10 @@ a {
     flex-direction: column;
 }
 
+/* ==========================================================================
+   🧭 PERFECTLY CENTERED TOPBAR LAYOUT
+   ========================================================================== */
+
 .topbar {
     position: fixed;
     top: 0;
@@ -424,9 +428,9 @@ a {
     padding: 14px 28px;
     display: flex;
     align-items: center;
-
+    justify-content: space-between;
     gap: 18px;
-
+    box-sizing: border-box;
 }
 
 .menu-btn {
@@ -438,40 +442,55 @@ a {
     color: var(--green-dark);
     font-size: 20px;
     align-items: center;
-    justify-content: center
+    justify-content: center;
+    border: none;
+    cursor: pointer;
 }
 
+/* 👈 Left Side Layout Block (Forces equal sizing) */
 .welcome {
-    flex: 0 0 auto
+    flex: 1;
+    /* Takes up identical space to right block */
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Prevents text overflow breaks */
 }
 
 .welcome h1 {
     font-size: 18px;
-    font-weight: 700
+    font-weight: 700;
+    margin: 0;
 }
 
 .welcome p {
     font-size: 12px;
-    color: var(--gray-500)
+    color: var(--gray-500);
+    margin: 2px 0 0 0;
 }
 
+/* 🎯 Center Piece: Search Input Container */
 .search {
-    flex: 2;
+    flex: none;
+    /* Disables flex weighting to prevent element stretching */
+    width: 100%;
     max-width: 560px;
     display: flex;
     align-items: center;
     gap: 10px;
-
     padding: 10px 14px;
     background: var(--white);
     border: 1px solid var(--gray-200);
     border-radius: 12px;
     transition: .2s;
+
+    /* Auto spacing centers it between the left and right items */
+    margin: 0 auto;
 }
 
 .search:focus-within {
     border-color: var(--green);
-    box-shadow: 0 0 0 4px rgba(22, 163, 74, .12)
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, .12);
 }
 
 .search input {
@@ -480,14 +499,19 @@ a {
     outline: none;
     font-size: 14px;
     background: none;
-    color: var(--text)
+    color: var(--text);
 }
 
+/* 👉 Right Side Actions Block (Forces equal sizing) */
 .top-actions {
+    flex: 1;
+    /* Takes up identical space to left block */
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-left: auto
+    justify-content: flex-end;
+    /* Pushes weather chip/bell to the far right */
+    gap: 12px;
 }
 
 .icon-btn {
@@ -499,13 +523,13 @@ a {
     display: grid;
     place-items: center;
     position: relative;
-    margin-right: -7px;
     transition: .2s;
+    cursor: pointer;
 }
 
 .icon-btn:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow)
+    box-shadow: var(--shadow);
 }
 
 .dot {
@@ -516,15 +540,7 @@ a {
     height: 8px;
     background: var(--red);
     border-radius: 50%;
-    box-shadow: 0 0 0 2px #fff
-}
-
-/* Upgraded Notification Container Context */
-.top-actions {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    box-shadow: 0 0 0 2px #fff;
 }
 
 /* Modernized Notification Dropdown Panel */
@@ -617,6 +633,17 @@ a {
     100% {
         box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
     }
+}
+
+/* ==========================================================================
+   📋 UPCOMING TASKS LIST LIMITER (Show only 3 items max)
+   ========================================================================== */
+
+/* Target the children inside your tasks list container */
+#dashboardTasksList>div:nth-child(n+4),
+#dashboardTasksList>.task-card:nth-child(n+4),
+#dashboardTasksList>.task-item:nth-child(n+4) {
+    display: none !important;
 }
 
 .weather-chip {

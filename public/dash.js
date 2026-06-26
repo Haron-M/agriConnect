@@ -48,6 +48,61 @@ document.addEventListener("DOMContentLoaded", () => {
         // Pull text back down when the mouse moves out
         sidebar.classList.remove("hover-expanded");
     });
+    const searchInput = document.querySelector(".search input");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const mainContent = document.getElementById("main-content");
+
+            if (!mainContent) return;
+
+            // 1. Grab all immediate children boxes/cards inside main-content
+            const blocks = mainContent.children;
+
+            if (blocks.length > 0) {
+                for (let block of blocks) {
+                    if (block.tagName === 'SCRIPT' || block.tagName === 'STYLE') continue;
+
+                    // Check if this block contains any nested child cards/items (like recent scans or tasks)
+                    // This targets divs, rows, or list items within your injected HTML
+                    const innerCards = block.querySelectorAll('div, li, tr, .card');
+
+                    if (innerCards.length > 0 && !block.classList.contains('stats')) {
+                        // If it contains nested items (like individual recent scans), filter those individually
+                        let hasVisibleChild = false;
+                        innerCards.forEach(card => {
+                            // Don't filter deeply nested wrappers, only actual content-bearing element blocks
+                            if (card.children.length <= 3 || card.classList.contains('scan-row') || card.innerText.includes('\n') === false) {
+                                const text = card.textContent.toLowerCase();
+                                if (text.includes(query)) {
+                                    card.style.display = "";
+                                    hasVisibleChild = true;
+                                } else {
+                                    card.style.display = "none";
+                                }
+                            }
+                        });
+
+                        // If none of the inner cards match, hide the whole section container
+                        if (query !== "" && !hasVisibleChild) {
+                            block.style.display = "none";
+                        } else {
+                            block.style.display = "";
+                        }
+                    } else {
+                        // Regular fallback: Filter the top-level sections directly if no inner items exist
+                        const blockText = block.textContent.toLowerCase();
+                        if (blockText.includes(query)) {
+                            block.style.display = "";
+                        } else {
+                            block.style.display = "none";
+                        }
+                    }
+                }
+            }
+        });
+    }
 });
 /* ==========================================================================
    2. CENTRAL APPLICATION STATE MANAGEMENT (Live Diagnostics Tracking)
@@ -483,8 +538,47 @@ async function fetchUserTasksFromSupabase() {
         updateDashboardUI();
         renderNaturalLanguageBanners();
 
+        // 🚀 FIX: Dynamic "See more (X hidden)" Counter Engine
+        const tasksListContainer = document.getElementById("dashboardTasksList");
+        if (tasksListContainer) {
+            // Remove any existing footer link first to prevent duplicates on refresh
+            const existingLink = tasksListContainer.parentElement.querySelector(".see-more-tasks-link");
+            if (existingLink) existingLink.remove();
+
+            // Count the actual rendered children task elements
+            const totalTasks = tasksListContainer.children.length;
+
+            if (totalTasks > 3) {
+                const hiddenCount = totalTasks - 3;
+
+                // Create the clean "See more" text button matching your design palette
+                const seeMoreLink = document.createElement("a");
+                seeMoreLink.href = "#";
+                seeMoreLink.className = "see-more-tasks-link";
+                seeMoreLink.style.cssText = `
+                    display: block; 
+                    text-align: center; 
+                    color: #16a34a; 
+                    font-size: 14px; 
+                    margin-top: 16px; 
+                    font-weight: 500; 
+                    text-decoration: none;
+                    transition: .2s;
+                `;
+                seeMoreLink.innerText = `See more (${hiddenCount} hidden) →`;
+
+                // Smoothly route them directly over to their activities log tab upon click
+                seeMoreLink.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById("btnactivities")?.click();
+                };
+
+                // Append the link clean below the container box list
+                tasksListContainer.after(seeMoreLink);
+            }
+        }
+
         // 4. FIX: Direct, foolproof check for the active Activities panel view
-        // If the "+ New task" button exists on the screen, the user is looking at Activities!
         const isCurrentlyOnActivitiesPage = document.getElementById('triggerNewTaskModalBtn') !== null;
 
         if (isCurrentlyOnActivitiesPage) {
@@ -496,7 +590,6 @@ async function fetchUserTasksFromSupabase() {
         console.error("Error handling or sync retrieval of tasks:", err);
     }
 }
-
 function getPendingTaskAlerts() {
     if (typeof FarmState === 'undefined' || !FarmState.tasksList || !FarmState.tasksList.length) {
         return '';
